@@ -1,0 +1,61 @@
+#Conditionally defer cloud-init to second boot, allowing vmtools customization on first boot and reboot
+---
+- name: Adding "disable_vmware_customization= true" to /etc/cloud/cloud.cfg
+  lineinfile:
+    line: "disable_vmware_customization: true"
+    path: /etc/cloud/cloud.cfg
+
+- name: Create directory for services
+  file:
+    path: /usr/lib/vmware-vmservice
+    state: directory
+    mode: 0755
+
+- name: Create disable-cloud-init-networking file
+  copy:
+    src: files/usr/lib/vmware-vmservice/disable-cloud-init-networking
+    dest: /usr/lib/vmware-vmservice/disable-cloud-init-networking
+    mode: 0755
+
+- name: Create disable-cloud-init-networking.service file
+  copy:
+    src: files/usr/lib/vmware-vmservice/disable-cloud-init-networking.service
+    dest: /usr/lib/vmware-vmservice/disable-cloud-init-networking.service
+
+- name: Create defer-cloud-init-generator file
+  copy:
+    src: files/usr/lib/vmware-vmservice/defer-cloud-init-generator
+    dest: /usr/lib/vmware-vmservice/defer-cloud-init-generator
+    mode: 0755
+
+- name: Create directory for system generators
+  file:
+    path: /etc/systemd/system-generators
+    state: directory
+    mode: 0755
+
+- name: Create a symlink between two files
+  file:
+    src: /usr/lib/vmware-vmservice/defer-cloud-init-generator
+    dest: /etc/systemd/system-generators/vmware-vmservice-defer-cloud-init-generator
+    state: link
+
+- name: Create a symlink between two machine-id files
+  file:
+    src: /etc/machine-id
+    dest: /var/lib/dbus/machine-id
+    state: link
+
+- name: Clean up added directories and files
+  file:
+    path: "{{ vm_files }}"
+    state: absent
+  vars:
+    vm_files:
+      - ssh_host_*
+      - vmware*
+      - cloud*
+
+- name: Clean up cloud-init
+  command:
+    cmd: cloud-init clean --seed --logs

@@ -1,0 +1,28 @@
+---
+# Needed only for Photon Refer: https://bugzilla.eng.vmware.com/show_bug.cgi?id=2751785#c10
+- name: Create afterdbus.conf
+  copy:
+    src: files/etc/systemd/system/vmtoolsd.service.d/afterdbus.conf
+    dest: /etc/systemd/system/vmtoolsd.service.d/afterdbus.conf
+    mode: 0644
+
+- name: Disable DHCP on the network interface
+  file:
+    path: "/etc/systemd/network/99-dhcp-en.network"
+    state: absent
+
+- import_tasks: va_hardening.yml
+
+- name: Enable Apparmor service
+  systemd:
+    name: apparmor
+    daemon_reload: yes
+    enabled: true
+    state: restarted
+
+- name: Enable Apparmor in kernel
+  lineinfile:
+    path: /boot/photon.cfg
+    backrefs: yes
+    regexp: "^(?!.*apparmor=1)(photon_cmdline.*)"
+    line: '\1 apparmor=1'

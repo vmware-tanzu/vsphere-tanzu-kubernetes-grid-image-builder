@@ -1,0 +1,9 @@
+---
+#photon does not have backward compatibility for legacy distro behavior for sysctl.conf by default
+#as it uses systemd-sysctl. set this var so we can use for sysctl conf file value.
+sysctl_conf_file: "{{ '/etc/sysctl.d/99-sysctl.conf' if ansible_os_family == 'VMware Photon OS' else '/etc/sysctl.conf' }}"
+
+photon_va_hardening_url: "{{ artifacts_container_url }}/artifacts/photon_hardening.tar.gz"
+va_hardening_rpm_version: "3.0"
+va_hardening_rpm_release: "{{ imageVersion }}"
+carvel_tools: "/tmp/carvel-tools"

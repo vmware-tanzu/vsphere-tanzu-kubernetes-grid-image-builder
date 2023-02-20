@@ -1,0 +1,41 @@
+kernel-param:
+  net.bridge.bridge-nf-call-iptables:
+    value: "1"
+  net.bridge.bridge-nf-call-ip6tables:
+    value: "1"
+{{if eq .Vars.OS "photon-3"}}
+  net.ipv4.ip_forward:
+    value: "0"
+  net.ipv6.conf.all.forwarding:
+    value: "0"
+  net.ipv4.tcp_congestion_control:
+    value: "cubic"
+{{end}}
+{{if eq .Vars.OS "ubuntu-2004-efi"}}
+  net.ipv4.ip_forward:
+    value: "1"
+  net.ipv6.conf.all.forwarding:
+    value: "1"
+  net.ipv4.tcp_congestion_control:
+    value: "bbr"
+{{end}}
+  net.ipv6.conf.all.disable_ipv6:
+    value: "0"
+{{range $name, $vers := index .Vars .Vars.OS "common-kernel-param"}}
+  {{ $name }}:
+  {{range $key, $val := $vers}}
+    {{$key}}: "{{$val}}"
+  {{end}}
+{{end}}
+{{range $name, $vers := index .Vars.tkg .Vars.OS "kernel-param"}}
+  {{ $name }}:
+  {{range $key, $val := $vers}}
+    {{$key}}: "{{$val}}"
+  {{end}}
+{{end}}
+{{range $name, $vers := index .Vars.tkg .Vars.OS .Vars.PROVIDER "kernel-param"}}
+  {{ $name }}:
+  {{range $key, $val := $vers}}
+    {{$key}}: "{{$val}}"
+  {{end}}
+{{end}}

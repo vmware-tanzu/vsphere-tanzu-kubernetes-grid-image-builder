@@ -1,0 +1,53 @@
+# Copyright 2021 The Kubernetes Authors.
+
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+
+# http://www.apache.org/licenses/LICENSE-2.0
+
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+---
+- name: Retag Container Images
+  script: files/scripts/image_retag.py --k8sSemver {{ kubernetes_semver }} --dockerVersion {{ dockerVersion }} --family "{{ ansible_os_family }}"
+  args:
+    executable: python3
+
+- name: Start docker registry
+  shell: 'ctr -n k8s.io run -d --null-io --net-host --rm --mount type=bind,src=/storage/container-registry,dst=/var/lib/registry,options=rbind:rw docker.io/vmware/docker-registry:2.7.1 docker-registry /bin/registry serve /etc/docker/registry/config.yaml'
+
+- name: Copy carvel packages and images to Embedded registry
+  script: files/scripts/utkg_download_carvel_packages.py --addonImageList {{ addon_image_list }} --addonLocalImageList {{ localhost_addon_image_list }}
+  args:
+    executable: python3
+
+- name: Install curl for listing container images
+  command: tdnf install curl -y
+  when: ansible_os_family == "VMware Photon OS"
+
+- name: Fetch Addon Carvel Packages List
+  shell: 'curl -k -X GET http://localhost:5000/v2/_catalog'
+  register: image_list
+
+- name: Removing curl
+  command: tdnf remove curl -y
+  when: ansible_os_family == "VMware Photon OS"
+
+- name: Print Addon Carvel Packages List
+  debug:
+    var: image_list.stdout_lines
+
+- name: Stop docker registry
+  shell: 'ctr -n k8s.io task kill docker-registry'
+
+- name: List images
+  shell: 'CONTAINERD_NAMESPACE="k8s.io" ctr --address=/var/run/containerd/containerd.sock images ls -q'
+  register: container_list
+
+- name: Print containers
+  debug:
+    var: container_list.stdout_lines

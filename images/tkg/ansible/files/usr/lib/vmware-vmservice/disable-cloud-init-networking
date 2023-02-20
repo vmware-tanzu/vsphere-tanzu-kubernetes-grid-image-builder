@@ -1,0 +1,5 @@
+#!/bin/sh
+
+set -e
+echo "network: {config: disabled}" > /etc/cloud/cloud.cfg.d/99_vmservice.cfg
+rm -rf /etc/netplan/*cloud-init*.yaml

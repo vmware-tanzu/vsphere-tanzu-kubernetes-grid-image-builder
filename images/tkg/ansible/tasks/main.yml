@@ -1,0 +1,24 @@
+---
+- import_tasks: common.yml
+
+- import_tasks: photon.yml
+  when: ansible_os_family == "VMware Photon OS"
+
+- import_tasks: ubuntu.yml
+  when: ansible_os_family == "Debian"
+
+- import_tasks: ubuntu_hack.yml
+  when: ansible_os_family == "Debian"
+
+- import_tasks: retag_images.yml
+
+- import_tasks: iptables.yml
+
+# va_hardening step in photon overrides the audit conf, so change the audit
+# conf after va_hardening is completed.
+- name: Change auditd configuration to rotate audit log files
+  ansible.builtin.shell: grep -qF "max_log_file_action" /etc/audit/auditd.conf && sed -i '/max_log_file_action/c\max_log_file_action = ROTATE' /etc/audit/auditd.conf || echo "max_log_file_action = ROTATE" >> /etc/audit/auditd.conf
+  args:
+    executable: /bin/bash
+
+- import_tasks: disable_pwd_rotation.yml
