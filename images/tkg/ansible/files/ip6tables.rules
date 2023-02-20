@@ -1,0 +1,11 @@
+*filter
+-P INPUT DROP
+-P FORWARD DROP
+-P OUTPUT DROP
+-A INPUT -i lo -j ACCEPT
+-A INPUT -m conntrack --ctstate RELATED,ESTABLISHED -j ACCEPT
+-A INPUT -p tcp -m tcp --dport 22 -j ACCEPT
+-A INPUT -p ipv6-icmp -j ACCEPT
+-A INPUT -p udp -m udp --sport 547 --dport 546 -j ACCEPT
+-A OUTPUT -j ACCEPT
+COMMIT

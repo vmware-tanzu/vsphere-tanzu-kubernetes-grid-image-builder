@@ -1,0 +1,37 @@
+service:
+  containerd:
+    enabled: false
+    running: true
+  dockerd:
+    enabled: false
+    running: false
+  kubelet:
+    enabled: true
+    running: false
+  conntrackd:
+    enabled: false
+    running: false
+  auditd:
+    enabled: true
+    running: true
+  chronyd:
+    enabled: true
+    running: true
+{{range $name, $vers := index .Vars .Vars.OS "common-service"}}
+  {{ $name }}:
+  {{range $key, $val := $vers}}
+    {{$key}}: {{$val}}
+  {{end}}
+{{end}}
+{{range $name, $vers := index .Vars .Vars.OS .Vars.PROVIDER "service"}}
+  {{ $name }}:
+  {{range $key, $val := $vers}}
+    {{$key}}: {{$val}}
+  {{end}}
+{{end}}
+{{range $name, $vers := index .Vars.tkg .Vars.OS "service"}}
+  {{ $name }}:
+  {{range $key, $val := $vers}}
+    {{$key}}: {{$val}}
+  {{end}}
+{{end}}

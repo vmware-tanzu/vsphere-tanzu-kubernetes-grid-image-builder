@@ -1,0 +1,57 @@
+#!/bin/bash
+set -e
+
+source $(dirname "${BASH_SOURCE[0]}")/utils.sh
+ROOT=$(dirname "${BASH_SOURCE[0]}")/../..
+
+enable_debugging
+
+is_argument_set "KUBERNETES_VERSION argument is required" $KUBERNETES_VERSION
+is_argument_set "OS_TARGET argument is required" $OS_TARGET
+is_argument_set "TKR_SUFFIX argument is required" $TKR_SUFFIX
+is_argument_set "ARTIFACTS_CONTAINER_IP argument is required" $ARTIFACTS_CONTAINER_IP
+is_argument_set "IMAGE_ARTIFACTS_PATH argument is required" $IMAGE_ARTIFACTS_PATH
+
+if [ -z "$ARTIFACTS_CONTAINER_PORT" ]; then
+    # Makefile creates this environment variables
+    ARTIFACTS_CONTAINER_PORT=$DEFAULT_ARTIFACTS_CONTAINER_PORT
+    echo "Using default port for artifacts container $DEFAULT_ARTIFACTS_CONTAINER_PORT"
+fi
+
+function build_node_image() {
+    docker run -d --network host  \
+    --name $(get_node_image_builder_container_name "$KUBERNETES_VERSION" "$OS_TARGET") \
+    $(get_node_image_builder_container_labels "$KUBERNETES_VERSION" "$OS_TARGET") \
+	-v $ROOT/ansible:/image-builder/images/capi/image/ansible \
+	-v $ROOT/goss:/image-builder/images/capi/image/goss \
+	-v $ROOT/hack:/image-builder/images/capi/image/hack \
+	-v $ROOT/packer-variables:/image-builder/images/capi/image/packer-variables \
+	-v $ROOT/scripts:/image-builder/images/capi/image/scripts \
+	-v $IMAGE_ARTIFACTS_PATH:/image-builder/images/capi/artifacts \
+	-w /image-builder/images/capi/ \
+	-e ARTIFACTS_CONTAINER_IP=$ARTIFACTS_CONTAINER_IP -e ARTIFACTS_CONTAINER_PORT=$ARTIFACTS_CONTAINER_PORT -e OS_TARGET=$OS_TARGET \
+	-e TKR_SUFFIX=$TKR_SUFFIX \
+	$BYOI_IMAGE_NAME
+}
+
+supported_os_list=$(jq -r '."'$KUBERNETES_VERSION'".supported_os' $SUPPORTED_VERSIONS_JSON)
+if [ "$supported_os_list" == "null" ]; then
+    print_error 'Use supported KUBERNETES_VERSION, run "make list-versions" to list the supported kubernetes versions'
+    exit 1
+fi
+
+supported_os=false
+while read SUPPORTED_OS_TARGET; do
+    if [ $SUPPORTED_OS_TARGET == $OS_TARGET ]; then
+        build_node_image
+		echo ""
+		next_hint_msg "Use \"docker logs -f $(get_node_image_builder_container_name $KUBERNETES_VERSION $OS_TARGET)\" to see logs and status"
+		next_hint_msg "Node Image OVA can be found at $IMAGE_ARTIFACTS_PATH/ovas/"
+        supported_os=true
+    fi
+done < <(jq -r '."'$KUBERNETES_VERSION'".supported_os[]' "$SUPPORTED_VERSIONS_JSON")
+
+if [ "$supported_os" == false ]; then
+	print_error 'Use supported OS_TARGET, run "make list-versions" to list the supported kubernetes versions'
+	exit 1
+fi

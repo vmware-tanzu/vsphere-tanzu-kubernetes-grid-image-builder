@@ -1,0 +1,28 @@
+package:
+  cloud-init:
+    installed: true
+  ntp:
+    installed: false
+# Looping over common packages for an OS
+{{range $name, $vers := index .Vars .Vars.OS "common-package"}}
+  {{$name}}:
+    installed: true
+  {{range $key, $val := $vers}}
+    {{$key}}: {{$val}}
+  {{end}}
+{{end}}
+# Looping over provider specific packages for an OS
+{{range $name, $vers := index .Vars .Vars.OS .Vars.PROVIDER "package"}}
+  {{$name}}:
+    installed: true
+  {{range $key, $val := $vers}}
+    {{$key}}: {{$val}}
+  {{end}}
+{{end}}
+{{range $name, $vers := index .Vars.tkg .Vars.OS "package"}}
+  {{$name}}:
+    installed: true
+  {{range $key, $val := $vers}}
+    {{$key}}: {{$val}}
+  {{end}}
+{{end}}
