@@ -1,0 +1,190 @@
+---
+# Everything from here to the TKG section should be kept in sync
+# with upstream settings
+common_debs: &common_debs
+  auditd:
+  apt-transport-https:
+  conntrack:
+  chrony:
+  curl:
+  ebtables:
+  jq:
+  gnupg:
+  libnetfilter-acct1:
+  libnetfilter-cttimeout1:
+  libnetfilter-log1:
+  linux-cloud-tools-virtual:
+  linux-tools-virtual:
+  open-vm-tools:
+  python3-distutils:
+  python3-netifaces:
+  python3-pip:
+  socat:
+
+common_photon_rpms: &common_photon_rpms
+  audit:
+  conntrack-tools:
+  chrony:
+  distrib-compat:
+  ebtables:
+  jq:
+  net-tools:
+  openssl-c_rehash:
+  open-vm-tools:
+  python-netifaces:
+  python3-pip:
+  python-requests:
+  rng-tools:
+  socat:
+  tar:
+  unzip:
+
+common_rpms: &common_rpms
+  audit:
+  ca-certificates:
+  conntrack-tools:
+  chrony:
+  curl:
+  ebtables:
+  jq:
+  open-vm-tools:
+  python-netifaces:
+  python-requests:
+  socat:
+  yum-utils:
+
+arch: "amd64"
+containerd_version: ""
+kubernetes_cni_source_type: "http"
+kubernetes_cni_version: ""
+kubernetes_source_type: "http"
+kubernetes_version: ""
+kubernetes_load_additional_imgs: true
+
+# OS Specific package/Command/Kernel Params etc...
+# Structured in below format
+# OS_NAME
+#   common-package:
+#   common-kernel-params:
+#   PROVIDER_NAME:
+#     package:
+#     command:
+#     service:
+#  ...
+ubuntu:
+  common-kernel-param:
+    net.ipv4.conf.all.rp_filter:
+      value: "1"
+  common-package:
+    <<: *common_debs
+    libseccomp2:
+  ova:
+    package:
+      open-vm-tools:
+      cloud-guest-utils:
+      cloud-initramfs-copymods:
+      cloud-initramfs-dyn-netconf:
+photon:
+  common-kernel-param:
+    net.ipv4.tcp_limit_output_bytes:
+      value: "524288"
+  common-package:
+    <<: *common_photon_rpms
+    libseccomp:
+  ova:
+    package:
+      cloud-init:
+      cloud-utils:
+      python3-netifaces:
+
+# This section contains everything unique to TKG
+tkg:
+  ubuntu:
+    package:
+      iptables-persistent:
+      unzip:
+    command:
+    service:
+      sshd.service:
+        running: true
+        enabled: true
+    kernel-param:
+    ova:
+      kernel-param:
+  photon:
+    package:
+      glibc:
+      zlib:
+      filesystem:
+      ethtool:
+      pkg-config:
+      bash:
+      bzip2:
+      shadow:
+      procps-ng:
+      iana-etc:
+      coreutils:
+      bc:
+      libtool:
+      findutils:
+      xz:
+      iproute2:
+      util-linux:
+      kmod:
+      linux-esx:
+      iptables:
+      Linux-PAM:
+      systemd:
+      dbus:
+      file:
+      e2fsprogs:
+      rpm:
+      gawk:
+      cloud-utils:
+      gptfdisk:
+      nfs-utils:
+      openssh:
+      gdbm:
+      photon-release:
+      photon-repos:
+      haveged:
+      sed:
+      grep:
+      cpio:
+      gzip:
+      vim:
+      libdb:
+      tdnf:
+      less:
+      iputils:
+      bindutils:
+      diffutils:
+      bridge-utils:
+      cri-tools:
+      apparmor-utils:
+      apparmor-profiles:
+      krb5:
+      which:
+      tzdata:
+      motd:
+      sudo:
+      iotop:
+      lsof:
+      traceroute:
+      dstat:
+      ltrace:
+      ipset:
+      netcat:
+      tcpdump:
+      wget:
+    command:
+    service:
+      sshd.service:
+        enabled: true
+        running: true
+      sshd-keygen.service:
+        enabled: true
+        running: false
+    kernel-param:
+    ova:
+      kernel-param:

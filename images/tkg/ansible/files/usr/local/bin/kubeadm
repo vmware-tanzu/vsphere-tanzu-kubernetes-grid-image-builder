@@ -1,0 +1,14 @@
+#!/bin/bash
+
+# Wrapper script to pass additional cmdline parameters to kubeadm that CABPK doesn't allow for.
+
+# Using a crictl command to verify the a successul run of the container runtime
+counter=0
+until [ "$counter" -ge 15 ] && echo "WARNING: crictl ps failed to run successfully. Containerd may not be running"
+do
+   crictl ps > /dev/null 2>&1 && break
+   counter=$((counter+1))
+   sleep 1s
+done
+
+/bin/kubeadm -v 1 "$@"

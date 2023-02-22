@@ -1,0 +1,20 @@
+---
+- name: Copy iptables rules file
+  copy:
+    src: iptables.rules
+    dest: "{{ '/etc/systemd/scripts/ip4save' if ansible_os_family == 'VMware Photon OS' else '/etc/iptables/rules.v4' }}"
+    mode: 0644
+
+- name: Copy ip6tables rules file
+  copy:
+    src: ip6tables.rules
+    dest: "{{ '/etc/systemd/scripts/ip6save' if ansible_os_family == 'VMware Photon OS' else '/etc/iptables/rules.v6' }}"
+    mode: 0644
+
+- name: Save to persist iptables rules
+  shell: "iptables-restore < /etc/iptables/rules.v4"
+  when: ansible_os_family == "Debian"
+
+- name: Save to persist ip6tables rules
+  shell: "ip6tables-restore < /etc/iptables/rules.v6"
+  when: ansible_os_family == "Debian"

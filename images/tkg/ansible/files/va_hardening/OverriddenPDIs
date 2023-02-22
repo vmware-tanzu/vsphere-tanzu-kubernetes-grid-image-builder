@@ -1,0 +1,14 @@
+# this module disables install of bridge interfaces
+GEN003619
+# this disables sshd service
+GEN001121
+# disables root login  for ssh
+GEN001120
+# disables account after 3 unsuccessfull attempts (needs to be removed later)
+GEN000460
+# enables aes ciphers
+GEN005505
+# enables wheel group
+GEN005521
+# makes all unknown directories to be owned by root
+GEN001160

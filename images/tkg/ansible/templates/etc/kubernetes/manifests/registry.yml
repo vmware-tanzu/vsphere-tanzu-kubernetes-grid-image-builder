@@ -1,0 +1,27 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: docker-registry
+  namespace: kube-system
+  labels:
+    app: docker-registry
+spec:
+  containers:
+    - command:
+        - /bin/registry
+        - serve
+        - /etc/docker/registry/config.yaml
+      image: docker.io/vmware/docker-registry:{{ dockerVersion }}
+      name: docker-registry
+      imagePullPolicy: IfNotPresent
+      volumeMounts:
+        - mountPath: /var/lib/registry
+          name: storage-container-registry
+          readOnly: false
+  hostNetwork: true
+  priorityClassName: system-node-critical
+  volumes:
+    - hostPath:
+        path: /storage/container-registry
+        type: Directory
+      name: storage-container-registry

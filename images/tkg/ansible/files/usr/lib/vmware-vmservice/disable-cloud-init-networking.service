@@ -1,0 +1,12 @@
+[Unit]
+Description=VMware VM Service - Disable Cloud-init networking
+After=systemd-remount-fs.service
+Before=open-vm-tools.service
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+ExecStart=/usr/lib/vmware-vmservice/disable-cloud-init-networking
+
+[Install]
+WantedBy=multi-user.target

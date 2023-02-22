@@ -1,0 +1,4 @@
+- name: Disable password expiry
+  ansible.builtin.shell: sed -i 's/^PASS_MAX_DAYS.*$/PASS_MAX_DAYS -1/g' /etc/login.defs
+  args:
+    executable: /bin/bash
