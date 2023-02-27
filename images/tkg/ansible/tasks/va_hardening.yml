@@ -1,3 +1,5 @@
+# Copyright 2023 VMware, Inc.
+# SPDX-License-Identifier: MPL-2.0
 ---
 - name: Install rpm-build package
   command: tdnf install rpm-build -y

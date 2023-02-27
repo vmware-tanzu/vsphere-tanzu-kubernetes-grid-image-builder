@@ -1,3 +1,6 @@
+# Copyright 2023 VMware, Inc.
+# SPDX-License-Identifier: MPL-2.0
+
 FROM photon:3.0
 
 ARG PACKER_VERSION=1.8.3
