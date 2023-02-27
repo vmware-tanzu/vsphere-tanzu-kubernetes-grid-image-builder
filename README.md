@@ -2,35 +2,18 @@
 
 ## Overview
 
-Lorem ipsum
+The VMware Image Builder project provides guidelines and tooling to build virtual machine (VM) images compatible with VMware vSphere.
 
 ## Getting Started
 
-Lorem ipsum
+This project is divided into two primary sections today, one for building base images for VMware and the other for building images for Tanzu Kubernetes Grid (TKG):
 
-### Prerequisites
-
-Lorem ipsum
-
-1. Prereq 1
-1. Prereq 2
-1. Prereq 3
-
-### Build & Run
-
-Lorem ipsum
-
-1. Step 1
-1. Step 2
-1. Step 3
-
-## Documentation
-
-Lorem ipsum
+* [How to build base images][base-images]
+* [How to build TKG images][tkg-images]
 
 ## Contributing
 
-The image-builder project team welcomes contributions from the community. Before you start working with image-builder, please read our [Developer Certificate of Origin][dco]. All contributions to this repository must be signed as described on that page. Your signature certifies that you wrote the patch or have the right to pass it on as an open-source patch. For more detailed information, please refer to [CONTRIBUTING][contributing].
+The VMware Image Builder project team welcomes contributions from the community. Before you start working with VMware Image Builder, please read our [Developer Certificate of Origin][dco]. All contributions to this repository must be signed as described on that page. Your signature certifies that you wrote the patch or have the right to pass it on as an open-source patch. For more detailed information, please refer to [CONTRIBUTING][contributing].
 
 ## License
 
@@ -38,7 +21,7 @@ This project is available under the [Mozilla Public License, V2.0][project-licen
 
 [//]: Links
 
-[contributing]: CONTRIBUTING.md
+[base-images]: ./images/base/
 [dco]: https://cla.vmware.com/dco
 [project-license]: LICENSE.txt
-
+[tkg-images]: ./images/tkg/
