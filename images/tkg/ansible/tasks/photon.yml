@@ -1,5 +1,6 @@
+# Copyright 2023 VMware, Inc.
+# SPDX-License-Identifier: MPL-2.0
 ---
-# Needed only for Photon Refer: https://bugzilla.eng.vmware.com/show_bug.cgi?id=2751785#c10
 - name: Create afterdbus.conf
   copy:
     src: files/etc/systemd/system/vmtoolsd.service.d/afterdbus.conf

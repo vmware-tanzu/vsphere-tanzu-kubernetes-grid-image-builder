@@ -1,3 +1,5 @@
+# Copyright 2023 VMware, Inc.
+# SPDX-License-Identifier: MPL-2.0
 ---
 - name: Configure /etc/sysctl.d/80-bridged-net-traffic.conf
   copy:
@@ -36,7 +38,6 @@
     dest: /etc/crictl.yaml
     mode: 0644
 
-# Fix for GCM-6896
 - name: Replace containerd systemd file
   copy:
     src: etc/systemd/system/containerd.service
@@ -122,7 +123,6 @@
   retries: 5
   delay: 3
 
-# To support https://gitlab.eng.vmware.com/core-build/guest-cluster-controller/-/merge_requests/703
 - name: Disable kubelet and containerd service
   systemd:
     name: "{{ item }}"

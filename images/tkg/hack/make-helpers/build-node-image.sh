@@ -1,4 +1,7 @@
 #!/bin/bash
+# Copyright 2023 VMware, Inc.
+# SPDX-License-Identifier: MPL-2.0
+
 set -e
 
 source $(dirname "${BASH_SOURCE[0]}")/utils.sh
