@@ -1,5 +1,7 @@
-#Conditionally defer cloud-init to second boot, allowing vmtools customization on first boot and reboot
+# Copyright 2023 VMware, Inc.
+# SPDX-License-Identifier: MPL-2.0
 ---
+#Conditionally defer cloud-init to second boot, allowing vmtools customization on first boot and reboot
 - name: Adding "disable_vmware_customization= true" to /etc/cloud/cloud.cfg
   lineinfile:
     line: "disable_vmware_customization: true"

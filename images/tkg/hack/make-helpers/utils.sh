@@ -1,4 +1,6 @@
 #!/bin/bash
+# Copyright 2023 VMware, Inc.
+# SPDX-License-Identifier: MPL-2.0
 
 # Terminal colors
 red='\033[0;31m'

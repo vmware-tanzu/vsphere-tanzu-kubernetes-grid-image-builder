@@ -1,4 +1,8 @@
 #!/usr/bin/env python3
+
+# Copyright 2023 VMware, Inc.
+# SPDX-License-Identifier: MPL-2.0
+
 import argparse
 import base64
 import json

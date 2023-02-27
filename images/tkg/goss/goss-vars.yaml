@@ -1,3 +1,6 @@
+# Copyright 2023 VMware, Inc.
+# SPDX-License-Identifier: MPL-2.0
+
 ---
 # Everything from here to the TKG section should be kept in sync
 # with upstream settings

@@ -1,3 +1,5 @@
+# Copyright 2023 VMware, Inc.
+# SPDX-License-Identifier: MPL-2.0
 
 SHELL := /usr/bin/env bash -o errexit -o pipefail -o nounset
 MAKEFLAGS += -s
