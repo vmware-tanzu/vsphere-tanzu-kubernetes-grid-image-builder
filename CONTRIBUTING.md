@@ -18,15 +18,6 @@ We welcome many different types of contributions and not all of them need a Pull
 * Helping to onboard new contributors
 * Other related activities
 
-## Getting started
-
-_TO BE EDITED: This section explains how to build the project from source, including Development Environment Setup, Build, Run and Test._
-
-_Provide information about how someone can find your project, get set up, build the code, test it, and submit a pull request successfully without having to ask any questions. Also include common errors people run into, or useful scripts they should run._
-
-_List any tests that the contributor should run / or testing processes to follow before submitting. Describe any automated and manual checks performed by reviewers._
-
-
 ## Contribution Flow
 
 This is a rough outline of what a contributor's workflow looks like:
@@ -40,6 +31,10 @@ This is a rough outline of what a contributor's workflow looks like:
 
 We follow the GitHub workflow and you can find more details on the [GitHub flow documentation][github-flow].
 
+## Reporting Bugs and Creating Issues
+
+For specifics on what to include in your report, please follow the guidelines in the issue and pull request templates when available.
+
 ### Pull Request Checklist
 
 Before submitting your pull request, we advise you to use the following:
@@ -48,34 +43,14 @@ Before submitting your pull request, we advise you to use the following:
 2. Ensure your commit messages are descriptive. We follow the conventions on [How to Write a Git Commit Message][git-commit]. Be sure to include any related GitHub issue references in the commit message. See [GFM syntax][github-markdown] for referencing issues and commits.
 3. Check the commits and commits messages and ensure they are free from typos.
 
-## Reporting Bugs and Creating Issues
-
-For specifics on what to include in your report, please follow the guidelines in the issue and pull request templates when available.
-
-_TO BE EDITED: Add additional information if needed._
-
-
 ## Ask for Help
 
-_TO BE EDITED: Provide information about the channels you use to communicate (i.e. Slack, IRC, Discord, etc)_
-
-The best way to reach us with a question when contributing is to ask on:
-
-* The original GitHub issue
-* The developer mailing list
-* Our Slack channel
-
-
-## Additional Resources
-
-_Optional_
+Please use Github Pull Requests and Github Issues as a means to start a conversation with the team.
 
 [//]: Links
 
 [code-of-conduct]: CODE_OF_CONDUCT.md
-[contributing]: CONTRIBUTING.md
 [dco]: https://cla.vmware.com/dco
 [git-commit]: http://chris.beams.io/posts/git-commit/
 [github-flow]: https://docs.github.com/en/get-started/quickstart/github-flow
 [github-markdown]: https://guides.github.com/features/mastering-markdown/#GitHub-flavored-markdown
-[project-license]: LICENSE.txt
