@@ -22,6 +22,7 @@ This project is available under the [Mozilla Public License, V2.0][project-licen
 [//]: Links
 
 [base-images]: ./images/base/
+[contributing]: CONTRIBUTING.md
 [dco]: https://cla.vmware.com/dco
 [project-license]: LICENSE.txt
 [tkg-images]: ./images/tkg/
