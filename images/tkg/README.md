@@ -117,7 +117,7 @@ make build-node-image OS_TARGET=photon-3 KUBERNETES_VERSION=v1.23.15+vmware.1 TK
 
 ## Customizations
 
-Sample customization examples can be found [here](docs/samples/README.md)
+Sample customization examples can be found [here](docs/examples/README.md)
 
 ## Debugging
 
