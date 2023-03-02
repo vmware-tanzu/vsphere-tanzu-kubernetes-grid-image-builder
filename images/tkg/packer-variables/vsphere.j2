@@ -1,13 +1,24 @@
 {
-    "vcenter_server":"10.191.206.154",
-    "username":"administrator@vsphere.local",
-    "password":"MVBOpf-0xo3+oZdB",
-    "datastore":"sharedVmfs-0",
-    "datacenter":"dc0",
+    {# vCenter server IP or FQDN #}
+    "vcenter_server":"",
+    {# SSO administrator username #}
+    "username":"",
+    {# SSO administrator password #}
+    "password":"",
+    {# Datacenter name where packer creates the VM for customization #}
+    "datacenter":"",
+    {# Datastore name for the VM #}
+    "datastore":"",
+    {# [Optional] Folder name #}
     "folder":"",
-    "cluster": "cluster0",
+    {# Cluster name where packer creates the VM for customization #}
+    "cluster": "",
+    {# Packer VM network #}
     "network": "VM Network",
+    {# To use insecure connection with vCenter  #}
     "insecure_connection": "true",
+    {# TO create a clone of the Packer VM after customization#}
     "linked_clone": "true",
+    {# To create a snapshot of the Packer VM after customization #}
     "create_snapshot": "true"
 }
