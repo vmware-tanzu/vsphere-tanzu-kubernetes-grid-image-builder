@@ -1,0 +1,114 @@
+{
+  "variables": {
+    "ansible_extra_vars": "ovf_rpctool_url={{user `ovf_rpctool_url`}}",
+    "boot_wait": "10s",
+    "cpu": "4",
+    "cpu_cores": "1",
+    "convert_to_template": "false",
+    "cope_per_socket": "1",
+    "disk_size": "10240",
+    "disk_thin_provisioned": "true",
+    "distro_arch": "amd64",
+    "distro_name": "photon",
+    "distro_version": "4",
+    "headless": "true",
+    "iso_checksum": "eeb08738209bf77306268d63b834fd91f6cecdfb",
+    "iso_url": "https://packages.vmware.com/photon/4.0/Rev2/iso/photon-4.0-c001795b8.iso",
+    "memory": "8192",
+    "network": "nat",
+    "os_display_name": "VMware Photon OS 64-bit",
+    "output_directory": "./output/{{ user `vm_name` }}/",
+    "ovf_rpctool_url": "https://storage.googleapis.com/load-balancer-api/ovf-rpctool/v0.0.1/ovf-rpctool",
+    "shutdown_command": "shutdown now",
+    "skip_compaction": "false",
+    "ssh_password": "vmware",
+    "ssh_timeout": "10m",
+    "ssh_username": "user1",
+    "ssh_wait_timeout": "10m",
+    "vm_name": "photon4-packer-vm-service-example",
+    "vmx_version": "15",
+    "vsphere_guest_os_type": "vmware-photon-64"
+  },
+  "builders": [
+    {
+      "type": "vmware-iso",
+      "cores": "{{user `cpu_cores`}}",
+      "cpus": "{{user `cpu`}}",
+      "disk_adapter_type": "scsi",
+      "disk_size": "{{ user `disk_size` }}",
+      "iso_url": "{{ user `iso_url` }}",
+      "iso_checksum": "{{ user `iso_checksum` }}",
+      "vm_name": "{{ user `vm_name` }}",
+      "memory": "{{user `memory`}}",
+      "ssh_username": "{{ user `ssh_username` }}",
+      "ssh_password": "{{ user `ssh_password` }}",
+      "ssh_timeout": "{{ user `ssh_timeout` }}",
+      "ssh_wait_timeout": "{{ user `ssh_wait_timeout` }}",
+      "guest_os_type": "{{user `vsphere_guest_os_type`}}",
+      "output_directory": "{{user `output_directory`}}",
+      "headless": "{{user `headless`}}",
+      "version": "{{user `vmx_version`}}",
+      "vmx_data": {
+        "ethernet0.connectionType": "{{ user `network` }}",
+        "cpuid.coresPerSocket": "{{ user `cope_per_socket` }}"
+      },
+      "format": "ovf",
+      "http_directory": "linux/photon/http",
+      "boot_wait": "{{ user `boot_wait` }}",
+      "boot_command": [
+        "<tab><wait> ",
+        "vmlinuz initrd=initrd.img root=/dev/ram0 loglevel=3 ",
+        "ks=http://{{ .HTTPIP }}:{{ .HTTPPort }}/kickstart.json ",
+        "insecure_installation=1<enter>"
+      ],
+      "shutdown_command": "echo '{{user `ssh_password`}}' | sudo -S -E sh -c 'usermod -L {{user `ssh_username`}} && {{user `shutdown_command`}}'",
+      "skip_compaction": "{{user `skip_compaction`}}"
+    }
+  ],
+  "provisioners": [
+    {
+      "type": "ansible",
+      "playbook_file": "../../ansible/playbook.yml",
+      "extra_arguments": [
+        "--extra-vars",
+        "{{user `ansible_extra_vars`}}"
+      ]
+    },
+    {
+      "type": "shell",
+      "inline": [
+        "echo 'Packer Template Photon Build on VMware -- Complete'"
+      ]
+    }
+  ],
+  "post-processors": [
+    {
+      "type": "manifest",
+      "name":"packer-manifest",
+      "output": "{{user `output_directory`}}/packer-manifest.json",
+      "strip_path": true,
+      "custom_data": {
+        "build_date": "{{isotime}}",
+        "build_timestamp": "{{user `build_timestamp`}}",
+        "disk_size": "{{ user `disk_size` }}",
+        "distro_arch": "{{ user `distro_arch` }}",
+        "distro_name": "{{ user `distro_name` }}",
+        "distro_version": "{{ user `distro_version` }}",
+        "guest_os_type":"{{user `vsphere_guest_os_type`}}",
+        "iso_checksum_type": "{{user `iso_checksum_type`}}",
+        "iso_checksum": "{{user `iso_checksum`}}",
+        "iso_url": "{{user `iso_url`}}",
+        "os_name": "{{user `os_display_name`}}",
+        "version": "{{user `version`}}"
+      }
+    },
+    {
+      "type": "shell-local",
+      "command": "../../hack/image-build-ova.py --stream_vmdk --vmx {{user `vmx_version`}} {{user `output_directory`}} --name {{ user `vm_name` }}"
+    },
+    {
+      "type": "shell-local",
+      "command": "../../hack/image-post-create-config.sh {{user `output_directory`}}"
+    }
+  ]
+}

@@ -1,3 +1,5 @@
 # Except this file
 .vscode
+.DS_Store
 !.gitignore
+*/output/.

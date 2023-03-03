@@ -1,0 +1,55 @@
+{
+    "disk": "/dev/sda",
+    "hostname": "photon localhost",
+    "password": {
+      "age": -1,
+      "crypted": true,
+      "text": "*"
+    },
+    "partitions": [
+      {
+        "mountpoint": "/boot",
+        "size": 512,
+        "filesystem": "ext4"
+      },
+      {
+        "mountpoint": "/",
+        "size": 0,
+        "filesystem": "ext4",
+        "lvm": {
+          "vg_name": "root_vg",
+          "lv_name": "root"
+        }
+      },
+      {
+        "size": 2048,
+        "filesystem": "swap",
+        "lvm": {
+          "vg_name": "swap_vg",
+          "lv_name": "swap1"
+        }
+      }
+    ],
+    "packages": [
+      "bash",
+      "linux",
+      "initramfs",
+      "lvm2",
+      "minimal",
+      "openssh-server",
+      "open-vm-tools",
+      "shadow",
+      "sudo",
+      "cloud-init"
+    ],
+    "postinstall": [
+      "#!/bin/bash",
+      "useradd -U -d /home/user1 -m --groups wheel user1 && echo 'user1:vmware' | chpasswd",
+      "echo 'user1 ALL=(ALL) NOPASSWD: ALL' >/etc/sudoers.d/user1",
+      "chmod 440 /etc/sudoers.d/user1",
+      "systemctl enable sshd.service",
+      "tdnf clean all",
+      "swapoff -a",
+      "rm -f /swapfile"
+    ]   
+  }
