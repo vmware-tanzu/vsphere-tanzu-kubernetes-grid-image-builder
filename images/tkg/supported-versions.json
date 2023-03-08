@@ -1,6 +1,6 @@
 {
-    "v1.22.13+vmware.1" : {
+    "v1.24.9+vmware.1" : {
         "supported_os": ["photon-3", "ubuntu-2004-efi"],
-        "artifacts_image": "projects-stg.registry.vmware.com/tkg/tkg-vsphere-linux-resource-bundle:v1.22.13_vmware.1-tkg.1"
+        "artifacts_image": "projects-stg.registry.vmware.com/tkg/tkg-vsphere-linux-resource-bundle:v1.24.9_vmware.1-tkg.1"
     }
 }
