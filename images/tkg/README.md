@@ -2,9 +2,17 @@
 
 The Image Builder provides tooling that can be used to build node images to use with [vSphere Tanzu](https://docs.vmware.com/en/VMware-vSphere/8.0/vsphere-with-tanzu-concepts-planning/GUID-70CAF0BB-1722-4526-9CE7-D5C92C15D7D0.html).
 
+## Content
+
+- [Prerequisites](#prerequisites)
+- [Building Images](#building-images)
+- [Make Targets](#make-targets)
+- [Customization Examples](#customizations-examples)
+- [Debugging](#debugging)
+
 ## Prerequisites
 
-vSphere Environment and Docker on a Linux environment are required for building these images
+Below are the prerequisites for building the node images
 
 - vSphere Environment version >= 8.0
 - Linux environment should have the below utilities available on the system
@@ -12,33 +20,25 @@ vSphere Environment and Docker on a Linux environment are required for building 
   - [GNU Make](https://www.gnu.org/software/make/)
   - [jq](https://stedolan.github.io/jq/)
 
-## Building
+## Building Images
 
-- vSphere Tanzu team generates an artifacts container image for a particular Kubernetes release and publishes it to the image registry.
-  - artifacts container hosts(NGINX server) all the required Carvel packages and other files for building the Image.
-- The customer needs to create an artifacts container before building the actual container.
-  - Use `make list-versions` to list supported Kubernetes versions and a separate make target to start the artifacts container(`make run-artifacts-container`).
-- Update the vSphere environment details like vCenter IP, Username, Password etc. in [vsphere.j2](packer-variables/vsphere.j2)
-- Start the image-builder container to build the node image(use `make build-node-image` target).
-  - When building photon images make sure to open ports from `8000` to `9000` or else create a JSON file with the below contents in the [packer-variables] folder(With this configuration only port `8039` needs to be opened) on the system where the image builder container is running.
+![Demo](./docs/files/demo.gif)
 
-  ```JSON
-  {
-    "http_port_max": "8039",
-    "http_port_min": "8039"
-  }
-  ```
-
-- Once the OVA is generated create a [local content library](https://docs.vmware.com/en/VMware-vSphere/7.0/com.vmware.vsphere.vm_admin.doc/GUID-2A0F1C13-7336-45CE-B211-610D39A6E1F4.html) and import the OVA.
-- To clean the container use `make clean`.
+- Clone this repository on the linux environment for building the image.
+- Update the vSphere environment details like vCenter IP, Username, Password, etc. in [vsphere.j2](packer-variables/vsphere.j2)
+  - For details on the permissions required for the user please refer to the packer [vsphere-iso documentation](https://developer.hashicorp.com/packer/plugins/builders/vsphere/vsphere-iso#required-vsphere-privileges).
+- Select the Kubernetes version.
+  - Use `make list-versions` to list supported Kubernetes versions.
+- Run the artifacts container for the selected Kubernetes version using `make run-artifacts-container KUBERNETES_VERSION=v1.22.13+vmware.1`.
+  - Default port used by the container is 8080 but this can be configured using the `ARTIFACTS_CONTAINER_PORT` parameter.
+- Run the image-builder container to build the node image(use `make build-node-image` target).
+  - When building photon images make sure to open ports from `8000` to `9000` or else refer to this [document](./docs/examples/configuring_packer_http_port.md) to customize the ports.
+- Once the OVA is generated upload the OVA to a [content library](https://docs.vmware.com/en/VMware-vSphere/7.0/com.vmware.vsphere.vm_admin.doc/GUID-897EEEC2-B378-41A7-B92B-D1159B5F6095.html) used by the supervisor.
+- To clean the containers and artifacts use the `make clean` target.
 
 ## Supported Kubernetes Versions
 
-`supported-versions.json` holds information about the supported Kubernetes versions and their corresponding supported OS targets along with the artifacts container image URL.
-
-Below are the supported Kubernetes versions
-
-- **v1.22.13+vmware.1**
+[supported-versions.json](supported-versions.json) holds information about the supported Kubernetes versions and their corresponding supported OS targets along with the artifacts container image URL. This file will be updated when a new Kubernetes version is supported by the **vSphere Tanzu** team.
 
 ## Make targets
 
@@ -63,9 +63,9 @@ make list-versions              # Retrieves information from supported-versions.
 There are three different clean targets to clean the containers or artifacts generated during the process or both.
 
 - `make clean-containers` is used to stop/remove the artifacts or image builder or both.
-  - During the container creation all of the containers will have `byoi` label
+  - During the container creation, All containers related to BYOI will be labelled as `byoi`
     - artifacts container will have `byoi_artifacts` and Kubernetes version as labels.
-    - image builder container will have `byoi_image_builder`, Kubernetes version and os target as labels
+    - image builder container will have `byoi_image_builder`, Kubernetes version, and os target as labels
 
 ```bash
 make clean-containers PRINT_HELP=y         # To show the help information for this target
@@ -92,14 +92,14 @@ make clean IMAGE_ARTIFACTS_PATH=/root/artifacts/ LABEL=byoi_image_builder # To c
 
 - `make run-artifacts-container` is used to run the artifacts container for a Kubernetes version at a particular port
   - artifacts image URL will be fetched from the [supported-versions.json](supported-versions.json) based on the Kubernetes version selected.
-  - By default artifacts container will use 8080 port but this can be configured through `ARTIFACTS_CONTAINER_PORT` parameter.
+  - By default artifacts container uses port `8080` by default however this can be configured through the `ARTIFACTS_CONTAINER_PORT` parameter.
 
 ```bash
 make run-artifacts-container PRINT_HELP=y                                                       # To show the help information for this target
-make run-artifacts-container KUBERNETES_VERSION=v1.22.13+vmware.1 ARTIFACTS_CONTAINER_PORT=9090 # To run 1.22.13 kubernetes artifacts container on port 9090
+make run-artifacts-container KUBERNETES_VERSION=v1.22.13+vmware.1 ARTIFACTS_CONTAINER_PORT=9090 # To run 1.22.13 Kubernetes artifacts container on port 9090
 ```
 
-- `make build-container` is used to build the image builder container locally with all the dependencies like `Packer`, `Ansible` and `OVF Tool`.
+- `make build-container` is used to build the image builder container locally with all the dependencies like `Packer`, `Ansible`, and `OVF Tool`.
 
 ```bash
 make build-image-builder-container PRINT_HELP=y # To show the help information for this target.
@@ -112,15 +112,15 @@ make build-image-builder-container              # To create the image builder co
 
 ```bash
 make build-node-image PRINT_HELP=y # To show the help information for this target.
-make build-node-image OS_TARGET=photon-3 KUBERNETES_VERSION=v1.23.15+vmware.1 TKR_SUFFIX=byoi ARTIFACTS_CONTAINER_IP=1.2.3.4 IMAGE_ARTIFACTS_PATH=/Users/kosarajud/image ARTIFACTS_CONTAINER_PORT=9090 # Create photon-3 1.23.15 kubernetes node image
+make build-node-image OS_TARGET=photon-3 KUBERNETES_VERSION=v1.23.15+vmware.1 TKR_SUFFIX=byoi ARTIFACTS_CONTAINER_IP=1.2.3.4 IMAGE_ARTIFACTS_PATH=/Users/image ARTIFACTS_CONTAINER_PORT=9090 # Create photon-3 1.23.15 Kubernetes node image
 ```
 
-## Customizations
+## Customizations Examples
 
 Sample customization examples can be found [here](docs/examples/README.md)
 
 ## Debugging
 
 - To enable debugging for the [make file scripts](hack/make-helpers/) export `DEBUGGING=true`.
-- Debug logs are enabled by default on the image builder container which can be viewed through `docker logs -f <container_name>` command.
+- Debug logs are enabled by default on the image builder container which can be viewed through the `docker logs -f <container_name>` command.
 - Packer logs can be found at `<artifacts-folder>/logs/packer-<random_id>.log` which will be helpful when debugging issues.
