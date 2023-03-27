@@ -73,9 +73,13 @@ make --version
 
 ## Update vsphere.j2 with vSphere environment details
 
+<<<<<<< HEAD
 CD to /tkg/packer-variables/.
 
 Create a copy of the original variables file.
+=======
+CD to /tkg/packer-variables/
+>>>>>>> 3c27b1e (Update Examples ReadMe, Add Tutorial)
 
 ```
 cp vsphere.j2 vsphere.j2-orig
@@ -85,12 +89,17 @@ cp vsphere.j2 vsphere.j2-orig
 Update the vsphere.j2 environment variables.
 
 ```
+<<<<<<< HEAD
 vi vsphere.j2
+=======
+vi /tkg/packer-variables/vsphere.j2
+>>>>>>> 3c27b1e (Update Examples ReadMe, Add Tutorial)
 ```
 
 ---
 {
     {# vCenter server IP or FQDN #}
+<<<<<<< HEAD
     "vcenter_server":"xx.xxx.xx.xxx",
     {# vCenter username #}
     "username":"user@vsphere.local",
@@ -100,12 +109,27 @@ vi vsphere.j2
     "datacenter":"Datacenter",
     {# Datastore name for the VM #}
     "datastore":"datastoreName",
+=======
+    "vcenter_server":"10.197.79.141",
+    {# vCenter username #}
+    "username":"lparis@vsphere.local",
+    {# vCenter user password #}
+    "password":"wcp_9w1P^csS",
+    {# Datacenter name where packer creates the VM for customization #}
+    "datacenter":"Datacenter",
+    {# Datastore name for the VM #}
+    "datastore":"datastore51",
+>>>>>>> 3c27b1e (Update Examples ReadMe, Add Tutorial)
     {# [Optional] Folder name #}
     "folder":"",
     {# Cluster name where packer creates the VM for customization #}
     "cluster": "Management Cluster",
     {# Packer VM network #}
+<<<<<<< HEAD
     "network": "PG-MGMT-VLAN-1050",
+=======
+    "network": "PG-MGMT-VLAN-1060",
+>>>>>>> 3c27b1e (Update Examples ReadMe, Add Tutorial)
     {# To use insecure connection with vCenter  #}
     "insecure_connection": "true",
     {# TO create a clone of the Packer VM after customization#}
@@ -115,7 +139,11 @@ vi vsphere.j2
 }
 ---
 
+<<<<<<< HEAD
 ## Select Kubernetes version
+=======
+## Select Kuberentes version
+>>>>>>> 3c27b1e (Update Examples ReadMe, Add Tutorial)
 
 ```
 make list-versions
@@ -127,8 +155,11 @@ make list-versions
 make run-artifacts-container KUBERNETES_VERSION=<version>
 ```
 
+<<<<<<< HEAD
 For example:
 
+=======
+>>>>>>> 3c27b1e (Update Examples ReadMe, Add Tutorial)
 ```
 ~/work/image-builder/images/tkg$  make run-artifacts-container KUBERNETES_VERSION=v1.24.9+vmware.1
 ```
@@ -140,6 +171,7 @@ For example:
 make build-node-image OS_TARGET=<os_target> KUBERNETES_VERSION=v1.24.9+vmware.1 TKR_SUFFIX=<tkr_suffix> ARTIFACTS_CONTAINER_IP=<artifacts_container_ip> IMAGE_ARTIFACTS_PATH=<image_artifacts_path> ARTIFACTS_CONTAINER_PORT=8081" to build node image
 ```
 
+<<<<<<< HEAD
 For example:
 
 ```
@@ -157,3 +189,16 @@ Refer to the customization examples.
 ## Upload the image to vSphere with Tanzu
 
 Create a local content library and upload the custom image there.
+=======
+```
+make build-node-image OS_TARGET=photon-3 KUBERNETES_VERSION=v1.24.9+vmware.1 TKR_SUFFIX=byoi ARTIFACTS_CONTAINER_IP=1.2.3.4 IMAGE_ARTIFACTS_PATH=/home/ubuntu/image ARTIFACTS_CONTAINER_PORT=8081
+```
+
+```
+make build-node-image OS_TARGET=ubuntu-2004-efi KUBERNETES_VERSION=v1.24.9+vmware.1 TKR_SUFFIX=byoi ARTIFACTS_CONTAINER_IP=1.2.3.4 IMAGE_ARTIFACTS_PATH=/home/ubuntu/image ARTIFACTS_CONTAINER_PORT=8081
+```
+
+```
+make build-node-image OS_TARGET=ubuntu-2004-efi KUBERNETES_VERSION=v1.24.9+vmware.1 TKR_SUFFIX=byoi ARTIFACTS_CONTAINER_IP=10.197.79.151 IMAGE_ARTIFACTS_PATH=/home/ubuntu/image ARTIFACTS_CONTAINER_PORT=8081
+```
+>>>>>>> 3c27b1e (Update Examples ReadMe, Add Tutorial)
