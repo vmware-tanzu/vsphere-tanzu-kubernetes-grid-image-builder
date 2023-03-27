@@ -73,7 +73,7 @@ make --version
 
 ## Update vsphere.j2 with vSphere environment details
 
-CD to /tkg/packer-variables/.
+CD to /tkg/packer-variables/
 
 Create a copy of the original variables file.
 
@@ -98,7 +98,7 @@ vi /tkg/packer-variables/vsphere.j2
     {# Datacenter name where packer creates the VM for customization #}
     "datacenter":"Datacenter",
     {# Datastore name for the VM #}
-    "datastore":"datastoreName",
+    "datastore":"datastore51",
     {# [Optional] Folder name #}
     "folder":"",
     {# Cluster name where packer creates the VM for customization #}
@@ -113,7 +113,8 @@ vi /tkg/packer-variables/vsphere.j2
     "create_snapshot": "true"
 }
 
-## Select Kubernetes version
+
+## Select Kuberentes version
 
 ```
 make list-versions
