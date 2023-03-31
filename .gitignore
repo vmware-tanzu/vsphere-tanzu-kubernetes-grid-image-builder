@@ -1,3 +1,4 @@
 # Except this file
 .vscode
 !.gitignore
+scripts/__pycache__
