@@ -27,3 +27,10 @@
     backrefs: yes
     regexp: "^(?!.*apparmor=1)(photon_cmdline.*)"
     line: '\1 apparmor=1'
+
+- name: Enable POS flag in kernel
+  lineinfile:
+    path: /boot/photon.cfg
+    backrefs: yes
+    regexp: "^(?!.*pos=1)(photon_cmdline.*)"
+    line: '\1 pos=1'
