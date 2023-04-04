@@ -158,6 +158,7 @@ Locally the image is stored in the `/image/ovas` directory, for example, `/home/
 The `/image/logs` directory contains the `packer-xxxx.log` file that you can use to troubleshoot image building errors.
 
 To verify that image is built successfully, check vCenter. You should see the image being built in the datacenter, cluster, folder that you specified in the vsphere.j2 file.
+<<<<<<< HEAD
 
 ## Customize the image
 
@@ -176,6 +177,8 @@ make build-node-image OS_TARGET=ubuntu-2004-efi KUBERNETES_VERSION=v1.24.9+vmwar
 ## Verify the image
 
 Check vCenter. You should see the image being built.
+=======
+>>>>>>> 0cdcc53 (Add details about where to find local image and link to create local content library, Signed-off by: Lorenzo Paris <lparis@vmware.com>)
 
 ## Customize the image
 
@@ -184,11 +187,18 @@ Refer to the customization examples.
 ## Upload the image to vSphere with Tanzu
 
 <<<<<<< HEAD
+<<<<<<< HEAD
+=======
+>>>>>>> 0cdcc53 (Add details about where to find local image and link to create local content library, Signed-off by: Lorenzo Paris <lparis@vmware.com>)
 Create a local content library and upload the custom image there.
 
 Refer to the documentation for [creating a local content library](https://docs.vmware.com/en/VMware-vSphere/8.0/vsphere-with-tanzu-tkg/GUID-19E8E034-5256-4EFC-BEBF-D4F17A8ED021.html) for use with TKG with Supervisor.
 
+<<<<<<< HEAD
 To use the custom TKR, configure the vSphere Namespace to use the local content library.
 =======
 Create a local content library and upload the custom image there.
 >>>>>>> a38f511 (Updates to the tutorial)
+=======
+To use the custom TKR, configure the vSphere Namespace to use the local content library.
+>>>>>>> 0cdcc53 (Add details about where to find local image and link to create local content library, Signed-off by: Lorenzo Paris <lparis@vmware.com>)
