@@ -1,6 +1,6 @@
 # Tutorial for Using the VMware Image Builder
 
-The VMware Image Builder uses Hashcorp Packer to generate images. Packer invokes vCenter APIs to create a VM from a TKR. 
+The VMware Image Builder uses Hashicorp Packer to generate images. Packer invokes vCenter APIs to create a VM from a TKR. 
 
 ## Requirements
 
