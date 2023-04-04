@@ -91,7 +91,7 @@ vi vsphere.j2
 ---
 {
     {# vCenter server IP or FQDN #}
-    "vcenter_server":"10.179.79.179",
+    "vcenter_server":"xx.xxx.xx.xxx",
     {# vCenter username #}
     "username":"user@vsphere.local",
     {# vCenter user password #}
@@ -143,7 +143,7 @@ make build-node-image OS_TARGET=<os_target> KUBERNETES_VERSION=v1.24.9+vmware.1 
 For example:
 
 ```
-make build-node-image OS_TARGET=ubuntu-2004-efi KUBERNETES_VERSION=v1.24.9+vmware.1 TKR_SUFFIX=byoi ARTIFACTS_CONTAINER_IP=10.197.79.151 IMAGE_ARTIFACTS_PATH=/home/ubuntu/image ARTIFACTS_CONTAINER_PORT=8081
+make build-node-image OS_TARGET=ubuntu-2004-efi KUBERNETES_VERSION=v1.24.9+vmware.1 TKR_SUFFIX=byoi ARTIFACTS_CONTAINER_IP=xx.xxx.xx.xxx IMAGE_ARTIFACTS_PATH=/home/ubuntu/image ARTIFACTS_CONTAINER_PORT=8081
 ```
 
 ## Verify the image
