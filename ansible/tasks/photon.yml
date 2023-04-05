@@ -22,8 +22,7 @@
     state: restarted
 
 - name: Enable Apparmor in kernel
-  lineinfile:
+  replace:
     path: /boot/photon.cfg
-    backrefs: yes
-    regexp: "^(?!.*apparmor=1)(photon_cmdline.*)"
-    line: '\1 apparmor=1'
+    regexp: "apparmor=0"
+    replace: "apparmor=1"
