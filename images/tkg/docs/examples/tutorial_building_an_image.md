@@ -77,8 +77,11 @@ CD to /tkg/packer-variables/.
 
 Create a copy of the original variables file.
 
+<<<<<<< HEAD
 Create a copy of the original variables file.
 
+=======
+>>>>>>> 27421b5e1bf30d4a52b12d392ba1d08207e9c954
 ```
 cp vsphere.j2 vsphere.j2-orig
 
@@ -87,16 +90,24 @@ cp vsphere.j2 vsphere.j2-orig
 Update the vsphere.j2 environment variables.
 
 ```
+<<<<<<< HEAD
 vi vsphere.j2
+=======
+vi /tkg/packer-variables/vsphere.j2
+>>>>>>> 27421b5e1bf30d4a52b12d392ba1d08207e9c954
 ```
 
 {
     {# vCenter server IP or FQDN #}
 <<<<<<< HEAD
+<<<<<<< HEAD
     "vcenter_server":"xx.xxx.xx.xxx",
 =======
     "vcenter_server":"10.179.79.179",
 >>>>>>> a38f511 (Updates to the tutorial)
+=======
+    "vcenter_server":"xx.xxx.xx.xxx",
+>>>>>>> 27421b5e1bf30d4a52b12d392ba1d08207e9c954
     {# vCenter username #}
     "username":"user@vsphere.local",
     {# vCenter user password #}
@@ -119,7 +130,10 @@ vi vsphere.j2
     "create_snapshot": "true"
 }
 
+<<<<<<< HEAD
 
+=======
+>>>>>>> 27421b5e1bf30d4a52b12d392ba1d08207e9c954
 ## Select Kubernetes version
 
 ```
@@ -146,6 +160,9 @@ make build-node-image OS_TARGET=<os_target> KUBERNETES_VERSION=v1.24.9+vmware.1 
 
 For example:
 <<<<<<< HEAD
+<<<<<<< HEAD
+=======
+>>>>>>> 27421b5e1bf30d4a52b12d392ba1d08207e9c954
 
 ```
 make build-node-image OS_TARGET=ubuntu-2004-efi KUBERNETES_VERSION=v1.24.9+vmware.1 TKR_SUFFIX=byoi ARTIFACTS_CONTAINER_IP=xx.xxx.xx.xxx IMAGE_ARTIFACTS_PATH=/home/ubuntu/image ARTIFACTS_CONTAINER_PORT=8081
@@ -167,18 +184,24 @@ Refer to the customization examples.
 ## Upload the image to vSphere with Tanzu
 
 Create a local content library and upload the custom image there.
+<<<<<<< HEAD
 =======
 
 ```
 make build-node-image OS_TARGET=ubuntu-2004-efi KUBERNETES_VERSION=v1.24.9+vmware.1 TKR_SUFFIX=byoi ARTIFACTS_CONTAINER_IP=10.197.79.151 IMAGE_ARTIFACTS_PATH=/home/ubuntu/image ARTIFACTS_CONTAINER_PORT=8081
 ```
 >>>>>>> a38f511 (Updates to the tutorial)
+=======
+>>>>>>> 27421b5e1bf30d4a52b12d392ba1d08207e9c954
 
 ## Verify the image
 
 Check vCenter. You should see the image being built.
+<<<<<<< HEAD
 =======
 >>>>>>> 0cdcc53 (Add details about where to find local image and link to create local content library, Signed-off by: Lorenzo Paris <lparis@vmware.com>)
+=======
+>>>>>>> 27421b5e1bf30d4a52b12d392ba1d08207e9c954
 
 ## Customize the image
 
@@ -188,12 +211,16 @@ Refer to the customization examples.
 
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
 =======
 >>>>>>> 0cdcc53 (Add details about where to find local image and link to create local content library, Signed-off by: Lorenzo Paris <lparis@vmware.com>)
+=======
+>>>>>>> 27421b5e1bf30d4a52b12d392ba1d08207e9c954
 Create a local content library and upload the custom image there.
 
 Refer to the documentation for [creating a local content library](https://docs.vmware.com/en/VMware-vSphere/8.0/vsphere-with-tanzu-tkg/GUID-19E8E034-5256-4EFC-BEBF-D4F17A8ED021.html) for use with TKG with Supervisor.
 
+<<<<<<< HEAD
 <<<<<<< HEAD
 To use the custom TKR, configure the vSphere Namespace to use the local content library.
 =======
@@ -202,3 +229,6 @@ Create a local content library and upload the custom image there.
 =======
 To use the custom TKR, configure the vSphere Namespace to use the local content library.
 >>>>>>> 0cdcc53 (Add details about where to find local image and link to create local content library, Signed-off by: Lorenzo Paris <lparis@vmware.com>)
+=======
+To use the custom TKR, configure the vSphere Namespace to use the local content library.
+>>>>>>> 27421b5e1bf30d4a52b12d392ba1d08207e9c954
