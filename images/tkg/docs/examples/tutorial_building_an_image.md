@@ -150,6 +150,7 @@ Locally the image is stored in the `/image/ovas` directory, for example, `/home/
 The `/image/logs` directory contains the `packer-xxxx.log` file that you can use to troubleshoot image building errors.
 
 To verify that image is built successfully, check vCenter. You should see the image being built in the datacenter, cluster, folder that you specified in the vsphere.j2 file.
+<<<<<<< HEAD
 
 ## Customize the image
 
