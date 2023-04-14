@@ -1,8 +1,8 @@
-# Tutorial for Using the VMware Image Builder
+# Tutorial for Using the vSphere Tanzu Kubernetes Grid Image Builder
 
-This tutorial describes how to use the VMware Image Builder to build a custom TKR for use with TKG 2 on Supervisor in the vSphere with Tanzu environment.
+This tutorial describes how to use the vSphere Tanzu Kubernetes Grid Image Builder to build a custom TKR for use with TKG 2 on Supervisor in the vSphere with Tanzu environment.
 
-The VMware Image Builder uses Hashicorp Packer to generate images. Packer invokes vCenter APIs to create a VM from a TKR. 
+The vSphere Tanzu Kubernetes Grid Image Builder uses Hashicorp Packer to generate images. Packer invokes vCenter APIs to create a VM from a TKR. 
 
 ## Requirements
 
@@ -13,7 +13,7 @@ The VMware Image Builder uses Hashicorp Packer to generate images. Packer invoke
 
 ## Clone the Repository
 
-Clone the VMware Image Builder repository on the Linux VM where you are building the image.
+Clone the vSphere Tanzu Kubernetes Grid Image Builder repository on the Linux VM where you are building the image.
 
 ```
 git clone https://github.com/vmware/image-builder.git
@@ -21,7 +21,7 @@ git clone https://github.com/vmware/image-builder.git
 
 ## Install Docker
 
-The VMware Image Builder runs components as Docker images to generate VMs.
+The vSphere Tanzu Kubernetes Grid Image Builder runs components as Docker images to generate VMs.
 
 Docker requires a 64-bit system with a Linux kernel having version 3.10 or newer. 
 
