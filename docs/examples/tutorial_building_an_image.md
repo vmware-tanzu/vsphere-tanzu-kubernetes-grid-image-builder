@@ -110,6 +110,7 @@ vi vsphere.j2
 
 For example:
 
+```
 {
     {# vCenter server IP or FQDN #}
     "vcenter_server":"192.2.2.2",
@@ -134,6 +135,7 @@ For example:
     {# To create a snapshot of the Packer VM after customization #}
     "create_snapshot": "true"
 }
+```
 
 ## Select Kubernetes version
 
