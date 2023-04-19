@@ -1,6 +1,6 @@
 # vSphere Tanzu Kubernetes Grid Image Builder
 
-vSphere Tanzu Kubernetes Grid Image Builder provides tooling that can be used to build node images to use with [vSphere Tanzu](https://docs.vmware.com/en/VMware-vSphere/8.0/vsphere-with-tanzu-concepts-planning/GUID-70CAF0BB-1722-4526-9CE7-D5C92C15D7D0.html).
+vSphere Tanzu Kubernetes Grid Image Builder provides tooling that can be used to build node images for use with [vSphere with Tanzu](https://docs.vmware.com/en/VMware-vSphere-with-Tanzu/index.html).
 
 ## Content
 
