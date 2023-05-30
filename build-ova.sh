@@ -14,6 +14,13 @@ custom_ovf_properties_file=${image_builder_root}/custom_ovf_properties.json
 artifacts_output_folder=${image_builder_root}/artifacts
 ova_destination_folder=${artifacts_output_folder}/ovas
 
+function checkout_image_builder_branch() {
+    # Check out image builder with specific commit for the
+    # corresponding k8s version
+    cd ${image_builder_root}
+    git checkout ${IMAGE_BUILDER_COMMIT_ID}
+}
+
 function copy_custom_image_builder_files() {
     cp image/hack/tkgs-image-build-ova.py hack/image-build-ova.py
     cp image/hack/tkgs_ovf_template.xml hack/ovf_template.xml
@@ -87,6 +94,7 @@ function copy_ova() {
 }
 
 function main() {
+    checkout_image_builder_branch
     copy_custom_image_builder_files
     download_configuration_files
     generate_packager_configuration

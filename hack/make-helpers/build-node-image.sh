@@ -33,9 +33,12 @@ function build_node_image() {
 	-v $IMAGE_ARTIFACTS_PATH:/image-builder/images/capi/artifacts \
 	-w /image-builder/images/capi/ \
 	-e ARTIFACTS_CONTAINER_IP=$ARTIFACTS_CONTAINER_IP -e ARTIFACTS_CONTAINER_PORT=$ARTIFACTS_CONTAINER_PORT -e OS_TARGET=$OS_TARGET \
-	-e TKR_SUFFIX=$TKR_SUFFIX \
+	-e TKR_SUFFIX=$TKR_SUFFIX -e IMAGE_BUILDER_COMMIT_ID=$IMAGE_BUILDER_COMMIT_ID \
 	$BYOI_IMAGE_NAME
 }
+
+# Fetching Image Builder commit ID from supported-versions.json
+IMAGE_BUILDER_COMMIT_ID=$(jq -r '."'$KUBERNETES_VERSION'".extra_params.image_builder_commit' $SUPPORTED_VERSIONS_JSON)
 
 supported_os_list=$(jq -r '."'$KUBERNETES_VERSION'".supported_os' $SUPPORTED_VERSIONS_JSON)
 if [ "$supported_os_list" == "null" ]; then
