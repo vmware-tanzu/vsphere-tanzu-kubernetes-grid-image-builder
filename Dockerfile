@@ -6,8 +6,6 @@ FROM photon:3.0
 ARG PACKER_VERSION=1.8.3
 ARG ANSIBLE_VERSION=2.11.5
 ARG IMAGE_BUILDER_REPO_NAME=image-builder
-# This is the upstream commit ID of the kubernetes image-builder (https://github.com/kubernetes-sigs/image-builder)
-ARG IMAGE_BUILDER_COMMIT_ID=1d4b0445b364712c3ab5d3c6f721b808fa0bfa2e
 
 ENV PATH=${PATH}:/ovftool
 
@@ -35,7 +33,6 @@ RUN unzip VMware-ovftool-4.4.3-18663434-lin.x86_64.zip -d /
 # Setup image Builder code
 RUN git clone https://github.com/kubernetes-sigs/image-builder.git
 WORKDIR $IMAGE_BUILDER_REPO_NAME
-RUN git checkout $IMAGE_BUILDER_COMMIT_ID
 
 # Running deps-ova to setup packer goss provisioner
 WORKDIR images/capi
