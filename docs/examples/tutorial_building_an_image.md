@@ -2,7 +2,7 @@
 
 This tutorial describes how to use the vSphere Tanzu Kubernetes Grid Image Builder to build a custom TKR for use with TKG 2 on Supervisor in the vSphere with Tanzu environment.
 
-The vSphere Tanzu Kubernetes Grid Image Builder uses Hashicorp Packer to generate images. Packer invokes vCenter APIs to create a VM from a TKR. 
+The vSphere Tanzu Kubernetes Grid Image Builder uses Hashicorp Packer to generate images. Packer invokes vCenter APIs to create a VM from a TKR.
 
 ## Requirements
 
@@ -15,49 +15,49 @@ The vSphere Tanzu Kubernetes Grid Image Builder uses Hashicorp Packer to generat
 
 Clone the vSphere Tanzu Kubernetes Grid Image Builder repository on the Linux VM where you are building the image.
 
-```
-git clone https://github.com/vmware/image-builder.git
+```bash
+git clone https://github.com/vmware-tanzu/vsphere-tanzu-kubernetes-grid-image-builder.git
 ```
 
 ## Install Docker
 
 The vSphere Tanzu Kubernetes Grid Image Builder runs components as Docker images to generate VMs.
 
-Docker requires a 64-bit system with a Linux kernel having version 3.10 or newer. 
+Docker requires a 64-bit system with a Linux kernel having version 3.10 or newer.
 
 Use the `uname` command to check the version of your kernel:
 
-```
-~$ uname -r
+```bash
+uname -r
 ```
 
-Docker provides a convenience script to install the latest version of Docker for testing, dev and lab purposes. 
+Docker provides a convenience script to install the latest version of Docker for testing, dev and lab purposes.
 
-```
-~$ wget -qO- https://get.docker.com/ | sh
+```bash
+wget -qO- https://get.docker.com/ | sh
 ```
 
 Remove the need for sudo execution of docker commands.  
 
-```
+```bash
 sudo usermod -aG docker $(whoami)
 ```
 
 Log out of the shell and log back in.
 
-```
+```bash
 exit
 ```
 
 Check if you can invoke the Docker client without sudo.
 
-```
-docker –-version || docker -v
+```bash
+docker --version
 ```
 
 Verify that the Docker daemon (dockerd engine) is running using the system service interface system.
 
-```
+```bash
 systemctl status --full docker
 ```
 
@@ -65,13 +65,13 @@ systemctl status --full docker
 
 Install:
 
-```
+```bash
 sudo apt install -y jq
 ```
 
 Verify:
 
-```
+```bash
 jq --version
 ```
 
@@ -79,13 +79,13 @@ jq --version
 
 Install:
 
-```
+```bash
 sudo apt install make
 ```
 
 Verify:
 
-```
+```bash
 make --version
 ```
 
@@ -93,24 +93,17 @@ make --version
 
 The `vsphere.j2` file is a packer configuration file with vSphere environment details.
 
-CD to the `/image-builder/packer-variables` directory.
-
-Create a copy of the original variables file.
-
-```
-cp vsphere.j2 vsphere.j2-orig
-
-```
+CD to the `vsphere-tanzu-kubernetes-grid-image-builder/packer-variables/` directory.
 
 Update the vsphere.j2 environment variables with details for your vCenter 8 instance.
 
-```
+```bash
 vi vsphere.j2
 ```
 
 For example:
 
-```
+```bash
 {
     {# vCenter server IP or FQDN #}
     "vcenter_server":"192.2.2.2",
@@ -139,9 +132,9 @@ For example:
 
 ## Select Kubernetes version
 
-From the `image-builder` directory where the Makefile is located run:
+From the `vsphere-tanzu-kubernetes-grid-image-builder` directory where the Makefile is located run:
 
-```
+```bash
 make list-versions
 ```
 
@@ -149,13 +142,13 @@ make list-versions
 
 Usage:
 
-```
+```bash
 make run-artifacts-container KUBERNETES_VERSION=<version>
 ```
 
 Example:
 
-```
+```bash
 make run-artifacts-container KUBERNETES_VERSION=v1.24.9+vmware.1
 ```
 
@@ -163,7 +156,7 @@ make run-artifacts-container KUBERNETES_VERSION=v1.24.9+vmware.1
 
 Usage:
 
-```
+```bash
 make build-node-image OS_TARGET=<os_target> KUBERNETES_VERSION=v1.24.9+vmware.1 TKR_SUFFIX=<tkr_suffix> ARTIFACTS_CONTAINER_IP=<artifacts_container_ip> IMAGE_ARTIFACTS_PATH=<image_artifacts_path> ARTIFACTS_CONTAINER_PORT=8081
 ```
 
@@ -171,7 +164,7 @@ NOTE: The ARTIFACTS_CONTAINER_IP value must be assigned by DHCP.
 
 Example:
 
-```
+```bash
 make build-node-image OS_TARGET=ubuntu-2004-efi KUBERNETES_VERSION=v1.24.9+vmware.1 TKR_SUFFIX=byoi ARTIFACTS_CONTAINER_IP=192.2.2.3 IMAGE_ARTIFACTS_PATH=/home/ubuntu/image ARTIFACTS_CONTAINER_PORT=8081
 ```
 
@@ -181,7 +174,7 @@ Locally the image is stored in the `/image/ovas` directory. For example, `/home/
 
 The `/image/logs` directory contains the `packer-xxxx.log` file that you can use to troubleshoot image building errors.
 
-To verify that image is built successfully, check vCenter Server. 
+To verify that image is built successfully, check vCenter Server.
 
 You should see the image being built in the datacenter, cluster, folder that you specified in the vsphere.j2 file.
 
