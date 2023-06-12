@@ -12,8 +12,6 @@
     path: "/etc/systemd/network/99-dhcp-en.network"
     state: absent
 
-- import_tasks: va_hardening.yml
-
 - name: Enable Apparmor service
   systemd:
     name: apparmor

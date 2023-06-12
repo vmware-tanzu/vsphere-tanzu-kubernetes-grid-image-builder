@@ -65,6 +65,16 @@ function generate_custom_ovf_properties() {
     --outfile ${custom_ovf_properties_file}
 }
 
+function download_photon3_stig_files() {
+    if [ ${OS_TARGET} == "photon-3" ] && [ ${KUBERNETES_VERSION} != "v1.24.9+vmware.1" ]
+    then
+      wget -q http://${ARTIFACTS_CONTAINER_IP}:${ARTIFACTS_CONTAINER_PORT}/artifacts/photon-3-stig-hardening.tar.gz
+      tar -xvf photon-3-stig-hardening.tar.gz -C ${image_builder_root}/image/ansible/
+      mv ${image_builder_root}/image/ansible/photon-3-stig-hardening-* ${image_builder_root}/image/ansible/tanzu-compliance
+      rm -rf photon-3-stig-hardening.tar.gz
+    fi
+}
+
 # Enable packer debug logging to the log file
 function packer_logging() {
     mkdir /image-builder/packer_cache
@@ -99,6 +109,7 @@ function main() {
     download_configuration_files
     generate_packager_configuration
     generate_custom_ovf_properties
+    download_photon3_stig_files
     packer_logging
     trigger_image_builder
     copy_ova
