@@ -96,7 +96,7 @@ class localRegistry():
     def __init__(self, dockerVersion):
         self.dockerVersion = dockerVersion
         self.ctrPrefix = "ctr -n k8s.io "
-        self.ctrRunOptions = "run -d --null-io --net-host --rm "
+        self.ctrRunOptions = "run -d --null-io --net-host "
 
         self.registryImage = f"docker.io/vmware/docker-registry:{self.dockerVersion}"
 

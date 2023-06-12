@@ -299,9 +299,10 @@ def update_cbt(cbt_file, cbt_name, old_tkr_name, new_tkr_name):
             cbt_data["spec"][addon]["valuesFrom"]["providerRef"]["name"].replace(old_tkr_name, new_tkr_name)
     for index in range(len(cbt_data["spec"]["additionalPackages"])):
         if "valuesFrom" in cbt_data["spec"]["additionalPackages"][index]:
-            cbt_data["spec"]["additionalPackages"][index]["valuesFrom"]["secretRef"] = \
-                cbt_data["spec"]["additionalPackages"][index]["valuesFrom"]["secretRef"].replace(old_tkr_name,
-                                                                                                 new_tkr_name)
+            if "secretRef" in cbt_data["spec"]["additionalPackages"][index]["valuesFrom"]:
+                cbt_data["spec"]["additionalPackages"][index]["valuesFrom"]["secretRef"] = \
+                    cbt_data["spec"]["additionalPackages"][index]["valuesFrom"]["secretRef"].replace(old_tkr_name,
+                                                                                                    new_tkr_name)
     with open(cbt_file, 'w') as fp:
         yaml.dump(cbt_data, fp)
     print("New CBT Name:", cbt_name)
