@@ -182,9 +182,6 @@ tkg:
       wget:
     command:
     service:
-      sshd.service:
-        enabled: true
-        running: true
       sshd-keygen.service:
         enabled: true
         running: false

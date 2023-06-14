@@ -5,6 +5,7 @@ import argparse
 import json
 import os
 import shutil
+import semver
 
 import yaml
 from jinja2 import Environment, BaseLoader
@@ -100,6 +101,11 @@ def populate_jinja_args(args):
     jinja_args_map.update(kubernetes_args)
     jinja_args_map["kubernetes_version"] = jinja_args_map["kubernetes"]
     jinja_args_map["kubernetes_series"] = jinja_args_map["kubernetes"].split('+')[0]
+
+    # Set STIG compliant value
+    jinja_args_map["photon3_stig_compliance"] = "false"
+    if args.os_type == "photon-3":
+        check_photon3_stig_compliance()
 
     images_local_host_paths = get_images_local_host_path(args)
     jinja_args_map.update(images_local_host_paths)
@@ -346,6 +352,10 @@ def render_folder_and_append(folder):
 def render_default_config(args):
     packer_vars.update(render_folder_and_append(args.default_config_folder))
 
+def check_photon3_stig_compliance():
+    current_kubernetes_version = jinja_args_map["kubernetes_series"].replace('v', "")
+    if semver.compare(current_kubernetes_version, "1.25.0") >= 0:
+        jinja_args_map["photon3_stig_compliance"] = "true"
 
 if __name__ == "__main__":
     main()

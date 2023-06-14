@@ -25,6 +25,9 @@ RUN mv /tmp/packer /usr/local/bin/
 # Install Ansible
 RUN pip3 install ansible-core==$ANSIBLE_VERSION
 
+# Install Semver
+RUN pip3 install semver
+
 # Install ovftool
 # TODO: this URL might change or expire so need to look at better way to install it on the container.
 RUN wget https://vdc-download.vmware.com/vmwb-repository/dcr-public/2ee5a010-babf-450b-ab53-fb2fa4de79af/2a136212-2f83-4f5d-a419-232f34dc08cf/VMware-ovftool-4.4.3-18663434-lin.x86_64.zip
