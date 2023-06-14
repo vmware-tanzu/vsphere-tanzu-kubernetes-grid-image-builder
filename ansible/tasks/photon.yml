@@ -13,6 +13,7 @@
     state: absent
 
 - import_tasks: va_hardening.yml
+  when: photon3_stig_compliance != "true"
 
 - name: Enable Apparmor service
   systemd:
