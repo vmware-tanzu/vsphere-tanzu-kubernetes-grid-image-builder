@@ -36,7 +36,7 @@ def set_versions(args):
     version_maps = {
         "image": kubernetes_config["image_version"],
         "k8s": kubernetes_config["kubernetes"],
-        "cloudInit": "19.4",
+        "cloudInit": "22.4.2",
         "coredns": kubernetes_config["coredns"],
         "etcd": kubernetes_config["etcd"],
     }

@@ -35,7 +35,6 @@ oom_score = 0
     enable_selinux = false
     sandbox_image = "{{ pause_image }}"
     stats_collect_period = 10
-    systemd_cgroup = false
     enable_tls_streaming = false
     max_container_log_line_size = 16384
     disable_proc_mount = false
@@ -43,6 +42,11 @@ oom_score = 0
       snapshotter = "overlayfs"
       no_pivot = false
       default_runtime_name = "runc"
+      [plugins."io.containerd.grpc.v1.cri".containerd.runtimes]
+       [plugins."io.containerd.grpc.v1.cri".containerd.runtimes.runc]
+         runtime_type = "io.containerd.runc.v2"
+         [plugins."io.containerd.grpc.v1.cri".containerd.runtimes.runc.options]
+           SystemdCgroup = true
       [plugins."io.containerd.grpc.v1.cri".containerd.untrusted_workload_runtime]
         runtime_type = ""
         runtime_engine = ""
