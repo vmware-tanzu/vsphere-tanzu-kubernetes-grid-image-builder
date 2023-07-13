@@ -6,13 +6,13 @@
     "load_additional_components": "true",
     "additional_url_images": "true",
     {# docker registry image for local registry to host container images  #}
-    "additional_url_images_list": "http://{{ artifacts_container_ip }}:{{ artifacts_container_port }}/artifacts/{{ kubernetes_version }}/bin/linux/amd64/docker_distribution_container_image.tar",
+    "additional_url_images_list": "http://{{ host_ip }}:{{ artifacts_container_port }}/artifacts/{{ kubernetes_version }}/bin/linux/amd64/docker_distribution_container_image.tar",
     {# additional variables passed to the ansible role, if stig is enabled #}
     {% set photon3_stig_compliance_data = "run_sysctl_net_ipv6_conf_all_mc_forwarding=false run_sysctl_net_ipv6_conf_default_mc_forwarding=false run_sysctl_net_ipv6_conf_eth0_mc_forwarding=false run_sshd_banner=false" %}
     {% set photon3_stig_custom_role = "/image-builder/images/capi/image/ansible/tanzu-compliance/roles/photon3" %}
     {# variables passed to the ansible role, if required a new custom
     role requires new variable append to this list at the end #}
-    "ansible_user_vars": "artifacts_container_url=http://{{ artifacts_container_ip }}:{{ artifacts_container_port }} dockerVersion={{ docker_distribution }} imageVersion={{ image_version|replace('-', '.') }} ansible_python_interpreter=/usr/bin/python3 addon_image_list=http://{{ artifacts_container_ip }}:{{ artifacts_container_port }}/artifacts/{{ kubernetes_version }}/packages/calico.tar,http://{{ artifacts_container_ip }}:{{ artifacts_container_port }}/artifacts/{{ kubernetes_version }}/packages/metrics-server.tar,http://{{ artifacts_container_ip }}:{{ artifacts_container_port }}/artifacts/{{ kubernetes_version }}/packages/capabilities.tar,http://{{ artifacts_container_ip }}:{{ artifacts_container_port }}/artifacts/{{ kubernetes_version }}/packages/guest-cluster-auth-service.tar,http://{{ artifacts_container_ip }}:{{ artifacts_container_port }}/artifacts/{{ kubernetes_version }}/packages/pinniped.tar,http://{{ artifacts_container_ip }}:{{ artifacts_container_port }}/artifacts/{{ kubernetes_version }}/packages/antrea.tar,http://{{ artifacts_container_ip }}:{{ artifacts_container_port }}/artifacts/{{ kubernetes_version }}/packages/vsphere-cpi.tar,http://{{ artifacts_container_ip }}:{{ artifacts_container_port }}/artifacts/{{ kubernetes_version }}/packages/vsphere-pv-csi.tar,http://{{ artifacts_container_ip }}:{{ artifacts_container_port }}/artifacts/{{ kubernetes_version }}/packages/secretgen-controller.tar,http://{{ artifacts_container_ip }}:{{ artifacts_container_port }}/artifacts/{{ kubernetes_version }}/packages/kapp-controller.tar localhost_addon_image_list={{ calico_package_localhost_path }},{{ metrics_server_package_localhost_path }},{{ capabilities_package_localhost_path }},{{ guest_cluster_auth_service_package_localhost_path }},{{ pinniped_package_localhost_path }},{{ antrea_package_localhost_path }},{{ vsphere_cpi_package_localhost_path }},{{ vsphere_pv_csi_package_localhost_path }},{{ secretgen_controller_package_localhost_path }},{{ kapp_controller_localhost_path }} networkd_dispatcher_download_url=http://{{ artifacts_container_ip }}:{{ artifacts_container_port }}/artifacts/networkd-dispatcher-2.1.tar.bz2 {% if photon3_stig_compliance == "true" %}{{ photon3_stig_compliance_data }}{% endif %} photon3_stig_compliance={{ photon3_stig_compliance }}",
+    "ansible_user_vars": "artifacts_container_url=http://{{ host_ip }}:{{ artifacts_container_port }} dockerVersion={{ docker_distribution }} imageVersion={{ image_version|replace('-', '.') }} ansible_python_interpreter=/usr/bin/python3 addon_image_list=http://{{ host_ip }}:{{ artifacts_container_port }}/artifacts/{{ kubernetes_version }}/packages/calico.tar,http://{{ host_ip }}:{{ artifacts_container_port }}/artifacts/{{ kubernetes_version }}/packages/metrics-server.tar,http://{{ host_ip }}:{{ artifacts_container_port }}/artifacts/{{ kubernetes_version }}/packages/capabilities.tar,http://{{ host_ip }}:{{ artifacts_container_port }}/artifacts/{{ kubernetes_version }}/packages/guest-cluster-auth-service.tar,http://{{ host_ip }}:{{ artifacts_container_port }}/artifacts/{{ kubernetes_version }}/packages/pinniped.tar,http://{{ host_ip }}:{{ artifacts_container_port }}/artifacts/{{ kubernetes_version }}/packages/antrea.tar,http://{{ host_ip }}:{{ artifacts_container_port }}/artifacts/{{ kubernetes_version }}/packages/vsphere-cpi.tar,http://{{ host_ip }}:{{ artifacts_container_port }}/artifacts/{{ kubernetes_version }}/packages/vsphere-pv-csi.tar,http://{{ host_ip }}:{{ artifacts_container_port }}/artifacts/{{ kubernetes_version }}/packages/secretgen-controller.tar,http://{{ host_ip }}:{{ artifacts_container_port }}/artifacts/{{ kubernetes_version }}/packages/kapp-controller.tar localhost_addon_image_list={{ calico_package_localhost_path }},{{ metrics_server_package_localhost_path }},{{ capabilities_package_localhost_path }},{{ guest_cluster_auth_service_package_localhost_path }},{{ pinniped_package_localhost_path }},{{ antrea_package_localhost_path }},{{ vsphere_cpi_package_localhost_path }},{{ vsphere_pv_csi_package_localhost_path }},{{ secretgen_controller_package_localhost_path }},{{ kapp_controller_localhost_path }} networkd_dispatcher_download_url=http://{{ host_ip }}:{{ artifacts_container_port }}/artifacts/networkd-dispatcher-2.1.tar.bz2 {% if photon3_stig_compliance == "true" %}{{ photon3_stig_compliance_data }}{% endif %} photon3_stig_compliance={{ photon3_stig_compliance }}",
     "kubernetes_typed_version": "{{ image_version }}",
     "vmx_version": "17",
     "cpu": "16",
@@ -22,19 +22,19 @@
      information pulled from artifacts container #}
     "containerd_version": "{{ containerd }}",
     "pause_image": "localhost:5000/vmware.io/pause:{{ pause }}",
-    "containerd_url": "http://{{ artifacts_container_ip }}:{{ artifacts_container_port }}/artifacts/{{ kubernetes_version }}/bin/linux/amd64/cri-containerd.tar",
+    "containerd_url": "http://{{ host_ip }}:{{ artifacts_container_port }}/artifacts/{{ kubernetes_version }}/bin/linux/amd64/cri-containerd.tar",
     "containerd_sha256": "{{ containerd_sha256 }}",
     "kubernetes_series": "{{ kubernetes_series }}",
     "kubernetes_semver": "{{ kubernetes_version }}",
     "kubernetes_container_registry": "projects.registry.vmware.com/tkg",
     "kubernetes_source_type": "http",
     {# kubernetes binaries location for CNI, kubelet, kubectl #}
-    "kubernetes_http_source": "http://{{ artifacts_container_ip }}:{{ artifacts_container_port }}/artifacts",
+    "kubernetes_http_source": "http://{{ host_ip }}:{{ artifacts_container_port }}/artifacts",
     "kubernetes_load_additional_imgs": "true",
     "kubeadm_template": "etc/kubeadm.yml",
     "kubernetes_cni_source_type": "http",
     "kubernetes_cni_semver": "{{ cni_plugins }}",
-    "kubernetes_cni_http_source": "http://{{ artifacts_container_ip }}:{{ artifacts_container_port }}/artifacts/cni_plugins",
+    "kubernetes_cni_http_source": "http://{{ host_ip }}:{{ artifacts_container_port }}/artifacts/cni_plugins",
     "kubernetes_cni_http_checksum": "",
     "disable_public_repos": "false",
     "remove_extra_repos": "true",

@@ -12,7 +12,7 @@ enable_debugging
 is_argument_set "KUBERNETES_VERSION argument is required" $KUBERNETES_VERSION
 is_argument_set "OS_TARGET argument is required" $OS_TARGET
 is_argument_set "TKR_SUFFIX argument is required" $TKR_SUFFIX
-is_argument_set "ARTIFACTS_CONTAINER_IP argument is required" $ARTIFACTS_CONTAINER_IP
+is_argument_set "HOST_IP argument is required" $HOST_IP
 is_argument_set "IMAGE_ARTIFACTS_PATH argument is required" $IMAGE_ARTIFACTS_PATH
 
 if [ -z "$ARTIFACTS_CONTAINER_PORT" ]; then
@@ -21,8 +21,14 @@ if [ -z "$ARTIFACTS_CONTAINER_PORT" ]; then
     echo "Using default port for artifacts container $DEFAULT_ARTIFACTS_CONTAINER_PORT"
 fi
 
+if [ -z "$PACKER_HTTP_PORT" ]; then
+    # Makefile creates this environment variables
+    PACKER_HTTP_PORT=$DEFAULT_PACKER_HTTP_PORT
+    echo "Using default Packer HTTP port $PACKER_HTTP_PORT"
+fi
+
 function build_node_image() {
-    docker run -d --network host  \
+    docker run -d  \
     --name $(get_node_image_builder_container_name "$KUBERNETES_VERSION" "$OS_TARGET") \
     $(get_node_image_builder_container_labels "$KUBERNETES_VERSION" "$OS_TARGET") \
 	-v $ROOT/ansible:/image-builder/images/capi/image/ansible \
@@ -32,8 +38,11 @@ function build_node_image() {
 	-v $ROOT/scripts:/image-builder/images/capi/image/scripts \
 	-v $IMAGE_ARTIFACTS_PATH:/image-builder/images/capi/artifacts \
 	-w /image-builder/images/capi/ \
-	-e ARTIFACTS_CONTAINER_IP=$ARTIFACTS_CONTAINER_IP -e ARTIFACTS_CONTAINER_PORT=$ARTIFACTS_CONTAINER_PORT -e OS_TARGET=$OS_TARGET \
+	-e HOST_IP=$HOST_IP -e ARTIFACTS_CONTAINER_PORT=$ARTIFACTS_CONTAINER_PORT -e OS_TARGET=$OS_TARGET \
 	-e TKR_SUFFIX=$TKR_SUFFIX -e IMAGE_BUILDER_COMMIT_ID=$IMAGE_BUILDER_COMMIT_ID -e KUBERNETES_VERSION=$KUBERNETES_VERSION \
+	-e PACKER_HTTP_PORT=$PACKER_HTTP_PORT \
+	-p $PACKER_HTTP_PORT:$PACKER_HTTP_PORT \
+	--platform linux/amd64 \
 	$BYOI_IMAGE_NAME
 }
 

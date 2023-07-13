@@ -9,6 +9,7 @@ MAKEFLAGS += -s
 # Default variables
 BYOI_IMAGE_NAME = vsphere-tanzu-byoi
 DEFAULT_ARTIFACTS_CONTAINER_PORT = 8081
+DEFAULT_PACKER_HTTP_PORT = 8082
 MAKE_HELPERS_PATH = $(shell pwd)/hack/make-helpers
 SUPPORTED_VERSIONS_JSON = $(shell pwd)/supported-versions.json
 
@@ -65,7 +66,7 @@ build-image-builder-container:
 	printf "$$green$$BUILD_IMAGE_BUILDER_CONTAINER_HELP_INFO$$clear\n"
 else
 build-image-builder-container:
-	docker build -q -t $(BYOI_IMAGE_NAME) .
+	docker build --platform=linux/amd64 -q -t $(BYOI_IMAGE_NAME) .
 endif
 
 define BUILD_NODE_IMAGE
@@ -79,12 +80,14 @@ define BUILD_NODE_IMAGE
 #   TKR_SUFFIX: [Required] TKR suffix for the generated Node image, this can be used to
 #               distinguish different node images.
 #   IMAGE_ARTIFACTS_PATH: [Required] Node image OVA and packer logs output folder.
-#   ARTIFACTS_CONTAINER_IP: [Required] Host IP on where artifacts container is running.
+#   HOST_IP: [Required] IP Address of host where artifact container is running.
 #   ARTIFACTS_CONTAINER_PORT: [Optional] Artifacts container port, defaults to $(DEFAULT_ARTIFACTS_CONTAINER_PORT)
+#   PACKER_HTTP_PORT: [Optional] Port used by Packer HTTP server for hosting the Preseed/Autoinstall files,
+#                     defaults to $(DEFAULT_PACKER_HTTP_PORT).
 # 
 # Example:
-# make build-node-image OS_TARGET=photon-3 KUBERNETES_VERSION=v1.23.15+vmware.1 TKR_SUFFIX=byoi ARTIFACTS_CONTAINER_IP=1.2.3.4 IMAGE_ARTIFACTS_PATH=$(HOME)/image
-# make build-node-image OS_TARGET=photon-3 KUBERNETES_VERSION=v1.23.15+vmware.1 TKR_SUFFIX=byoi ARTIFACTS_CONTAINER_IP=1.2.3.4 IMAGE_ARTIFACTS_PATH=$(HOME)/image ARTIFACTS_CONTAINER_PORT=9090
+# make build-node-image OS_TARGET=photon-3 KUBERNETES_VERSION=v1.23.15+vmware.1 TKR_SUFFIX=byoi HOST_IP=1.2.3.4 IMAGE_ARTIFACTS_PATH=$(HOME)/image
+# make build-node-image OS_TARGET=photon-3 KUBERNETES_VERSION=v1.23.15+vmware.1 TKR_SUFFIX=byoi HOST_IP=1.2.3.4 IMAGE_ARTIFACTS_PATH=$(HOME)/image ARTIFACTS_CONTAINER_PORT=9090 PACKER_HTTP_PORT=9091
 endef
 .PHONY: build-node-image
 ifeq ($(PRINT_HELP),y)

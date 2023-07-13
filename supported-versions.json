@@ -3,14 +3,14 @@
         "supported_os": ["photon-3", "ubuntu-2004-efi"],
         "artifacts_image": "projects.registry.vmware.com/tkg/tkg-vsphere-linux-resource-bundle:v1.24.9_vmware.1-tkg.1",
         "extra_params": {
-            "image_builder_commit": "1d4b0445b364712c3ab5d3c6f721b808fa0bfa2e"
+            "image_builder_commit": "5d8c0eb6d0e1a15ad80280b8af1b8102a3afeed2"
         }
     },
     "v1.25.7+vmware.3" : {
         "supported_os": ["photon-3", "ubuntu-2004-efi"],
         "artifacts_image": "projects.registry.vmware.com/tkg/tkg-vsphere-linux-resource-bundle:v1.25.7_vmware.3-fips.1-tkg.1",
         "extra_params": {
-            "image_builder_commit": "1d4b0445b364712c3ab5d3c6f721b808fa0bfa2e"
+            "image_builder_commit": "5d8c0eb6d0e1a15ad80280b8af1b8102a3afeed2"
         }
     }
 }
