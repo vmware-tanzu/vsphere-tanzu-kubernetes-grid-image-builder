@@ -19,6 +19,7 @@ function checkout_image_builder_branch() {
     # Check out image builder with specific commit for the
     # corresponding k8s version
     cd ${image_builder_root}
+    git pull
     git checkout ${IMAGE_BUILDER_COMMIT_ID}
 }
 
@@ -29,25 +30,26 @@ function copy_custom_image_builder_files() {
 
 function download_configuration_files() {
     # Download kubernetes configuration file
-    wget -q http://${ARTIFACTS_CONTAINER_IP}:${ARTIFACTS_CONTAINER_PORT}/artifacts/metadata/kubernetes_config.json
+    wget -q http://${HOST_IP}:${ARTIFACTS_CONTAINER_PORT}/artifacts/metadata/kubernetes_config.json
 
     # Download tkr-bom and tkr metadata files
-    wget -q http://${ARTIFACTS_CONTAINER_IP}:${ARTIFACTS_CONTAINER_PORT}/artifacts/tkr-bom/tkr-bom.yaml
-    wget -q http://${ARTIFACTS_CONTAINER_IP}:${ARTIFACTS_CONTAINER_PORT}/artifacts/metadata/unified-tkr-vsphere.tar.gz
+    wget -q http://${HOST_IP}:${ARTIFACTS_CONTAINER_PORT}/artifacts/tkr-bom/tkr-bom.yaml
+    wget -q http://${HOST_IP}:${ARTIFACTS_CONTAINER_PORT}/artifacts/metadata/unified-tkr-vsphere.tar.gz
     mkdir ${tkr_metadata_folder}
     tar xzf unified-tkr-vsphere.tar.gz -C ./tkr-metadata
 
     # Download compatibility files
-    wget -q http://${ARTIFACTS_CONTAINER_IP}:${ARTIFACTS_CONTAINER_PORT}/artifacts/metadata/compatibility/vmware-system.compatibilityoffering.json
-    wget -q http://${ARTIFACTS_CONTAINER_IP}:${ARTIFACTS_CONTAINER_PORT}/artifacts/metadata/compatibility/vmware-system.guest.kubernetes.distribution.image.version.json
+    wget -q http://${HOST_IP}:${ARTIFACTS_CONTAINER_PORT}/artifacts/metadata/compatibility/vmware-system.compatibilityoffering.json
+    wget -q http://${HOST_IP}:${ARTIFACTS_CONTAINER_PORT}/artifacts/metadata/compatibility/vmware-system.guest.kubernetes.distribution.image.version.json
 }
 
 # Generate packaer input variables based on packer-variables folder
 function generate_packager_configuration() {
     mkdir -p $ova_destination_folder
     python3 image/scripts/tkg_byoi.py setup \
-    --artifacts_container_ip ${ARTIFACTS_CONTAINER_IP} \
+    --host_ip ${HOST_IP} \
     --artifacts_container_port ${ARTIFACTS_CONTAINER_PORT} \
+    --packer_http_port ${PACKER_HTTP_PORT} \
     --default_config_folder ${default_packer_variables} \
     --dest_config ${packer_configuration_folder} \
     --tkr_metadata_folder ${tkr_metadata_folder} \
@@ -85,7 +87,7 @@ function download_photon3_stig_files() {
       then
         rm -rf ${tanzu_compliance_dir}
       fi
-      wget -q http://${ARTIFACTS_CONTAINER_IP}:${ARTIFACTS_CONTAINER_PORT}/artifacts/photon-3-stig-hardening.tar.gz
+      wget -q http://${HOST_IP}:${ARTIFACTS_CONTAINER_PORT}/artifacts/photon-3-stig-hardening.tar.gz
       tar -xvf photon-3-stig-hardening.tar.gz -C ${image_builder_root}/image/ansible/
       mv ${image_builder_root}/image/ansible/photon-3-stig-hardening-* ${tanzu_compliance_dir}
       rm -rf photon-3-stig-hardening.tar.gz

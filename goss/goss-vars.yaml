@@ -134,7 +134,8 @@ tkg:
       iproute2:
       util-linux:
       kmod:
-      linux-esx:
+      linux:
+      linux-devel:
       iptables:
       Linux-PAM:
       systemd:

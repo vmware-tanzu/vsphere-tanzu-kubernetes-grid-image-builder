@@ -36,9 +36,9 @@ Below are the prerequisites for building the node images
 - Select the Kubernetes version.
   - Use `make list-versions` to list supported Kubernetes versions.
 - Run the artifacts container for the selected Kubernetes version using `make run-artifacts-container KUBERNETES_VERSION=v1.22.13+vmware.1`.
-  - Default port used by the container is 8080 but this can be configured using the `ARTIFACTS_CONTAINER_PORT` parameter.
+  - Default port used by the artifacts container is `8081` but this can be configured using the `ARTIFACTS_CONTAINER_PORT` parameter.
 - Run the image-builder container to build the node image(use `make build-node-image` target).
-  - When building photon images make sure to open ports from `8000` to `9000` or else refer to this [document](./docs/examples/configuring_packer_http_port.md) to customize the ports.
+  - Default port used the image-builder containter is `8082` but this can be configured using the `PACKER_HTTP_PORT`.
 - Once the OVA is generated upload the OVA to a [content library](https://docs.vmware.com/en/VMware-vSphere/7.0/com.vmware.vsphere.vm_admin.doc/GUID-897EEEC2-B378-41A7-B92B-D1159B5F6095.html) used by the supervisor.
 - To clean the containers and artifacts use the `make clean` target.
 
@@ -113,12 +113,12 @@ make build-image-builder-container              # To create the image builder co
 ```
 
 - `make build-node-image` is used to build the vSphere Tanzu compatible node image for a Kubernetes version.
-  - Artifacts container IP is required to pull the required Carvel Packages during the image build process and the default artifacts container port is 8080 which can be configured through `ARTIFACTS_CONTAINER_PORT`.
+  - Host IP is required to pull the required Carvel Packages during the image build process and the default artifacts container port is 8080 which can be configured through `ARTIFACTS_CONTAINER_PORT`.
   - TKR(Tanzu Kubernetes Release) Suffix is used to distinguish images built on the same version for a different purpose. Maximum suffix length can be 8 characters.
 
 ```bash
 make build-node-image PRINT_HELP=y # To show the help information for this target.
-make build-node-image OS_TARGET=photon-3 KUBERNETES_VERSION=v1.23.15+vmware.1 TKR_SUFFIX=byoi ARTIFACTS_CONTAINER_IP=1.2.3.4 IMAGE_ARTIFACTS_PATH=/Users/image ARTIFACTS_CONTAINER_PORT=9090 # Create photon-3 1.23.15 Kubernetes node image
+make build-node-image OS_TARGET=photon-3 KUBERNETES_VERSION=v1.23.15+vmware.1 TKR_SUFFIX=byoi HOST_IP=1.2.3.4 IMAGE_ARTIFACTS_PATH=/Users/image ARTIFACTS_CONTAINER_PORT=9090 # Create photon-3 1.23.15 Kubernetes node image
 ```
 
 ## Customizations Examples

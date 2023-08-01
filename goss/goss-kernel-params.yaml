@@ -6,22 +6,18 @@ kernel-param:
     value: "1"
   net.bridge.bridge-nf-call-ip6tables:
     value: "1"
-{{if eq .Vars.OS "photon-3"}}
+{{if and (contains "1.24" .Vars.kubernetes_version ) (contains "photon" .Vars.OS )}}
   net.ipv4.ip_forward:
     value: "0"
   net.ipv6.conf.all.forwarding:
     value: "0"
-  net.ipv4.tcp_congestion_control:
-    value: "cubic"
+{{else}}
+  net.ipv4.ip_forward:
+  net.ipv6.conf.all.forwarding:
+    value: "1"
 {{end}}
-{{if eq .Vars.OS "ubuntu-2004-efi"}}
-  net.ipv4.ip_forward:
-    value: "1"
-  net.ipv6.conf.all.forwarding:
-    value: "1"
   net.ipv4.tcp_congestion_control:
     value: "bbr"
-{{end}}
   net.ipv6.conf.all.disable_ipv6:
     value: "0"
 {{range $name, $vers := index .Vars .Vars.OS "common-kernel-param"}}
