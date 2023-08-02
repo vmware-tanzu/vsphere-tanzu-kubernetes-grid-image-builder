@@ -22,6 +22,7 @@ if [ "$artifacts_container_image_url" == "null" ]; then
 fi
 
 container_name=$(get_artifacts_container_name "$KUBERNETES_VERSION")
-docker run -d --name $container_name $(get_artifacts_container_labels $KUBERNETES_VERSION) -p $ARTIFACTS_CONTAINER_PORT:80 $artifacts_container_image_url
+docker run -d --name $container_name $(get_artifacts_container_labels $KUBERNETES_VERSION) -p $ARTIFACTS_CONTAINER_PORT:80 --platform linux/amd64 $artifacts_container_image_url
 
-next_hint_msg "Use \"make build-node-image OS_TARGET=<os_target> KUBERNETES_VERSION=${KUBERNETES_VERSION} TKR_SUFFIX=<tkr_suffix> ARTIFACTS_CONTAINER_IP=<artifacts_container_ip> IMAGE_ARTIFACTS_PATH=<image_artifacts_path> ARTIFACTS_CONTAINER_PORT=${ARTIFACTS_CONTAINER_PORT}\" to build node image"
+next_hint_msg "Use \"make build-node-image OS_TARGET=<os_target> KUBERNETES_VERSION=${KUBERNETES_VERSION} TKR_SUFFIX=<tkr_suffix> HOST_IP=<host_ip> IMAGE_ARTIFACTS_PATH=<image_artifacts_path> ARTIFACTS_CONTAINER_PORT=${ARTIFACTS_CONTAINER_PORT} PACKER_HTTP_PORT=${DEFAULT_PACKER_HTTP_PORT}\" to build node image"
+next_hint_msg "Change PACKER_HTTP_PORT if the ${DEFAULT_PACKER_HTTP_PORT} port is already in use or not opened"

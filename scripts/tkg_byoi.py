@@ -35,10 +35,12 @@ def parse_args():
                              help='Kubernetes related configuration JSON')
     setup_group.add_argument('--os_type', required=True,
                              help='OS type')
-    setup_group.add_argument('--artifacts_container_ip', required=True,
-                             help='Artifacts container IP')
+    setup_group.add_argument('--host_ip', required=True,
+                             help='Host IP')
     setup_group.add_argument('--artifacts_container_port', required=False,
                              help='Artifacts container port, default value is 8081', default="8081")
+    setup_group.add_argument('--packer_http_port', required=False,
+                             help='Packer HTTP server port, default value is 8082', default="8082")
     setup_group.add_argument('--default_config_folder', required=True,
                              help='Path to default packer variable configuration folder')
     setup_group.add_argument('--tkr_metadata_folder', required=True,
