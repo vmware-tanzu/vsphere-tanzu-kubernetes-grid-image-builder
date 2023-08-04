@@ -28,6 +28,8 @@ if [ -z "$PACKER_HTTP_PORT" ]; then
 fi
 
 function build_node_image() {
+    docker rm -f $(get_node_image_builder_container_name "$KUBERNETES_VERSION" "$OS_TARGET")
+
     docker run -d  \
     --name $(get_node_image_builder_container_name "$KUBERNETES_VERSION" "$OS_TARGET") \
     $(get_node_image_builder_container_labels "$KUBERNETES_VERSION" "$OS_TARGET") \
