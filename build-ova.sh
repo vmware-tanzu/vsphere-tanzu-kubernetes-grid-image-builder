@@ -82,7 +82,7 @@ function download_photon3_stig_files() {
     check_photon3_stig_compliance
     if [ ${OS_TARGET} == "photon-3" ] && [ ${photon3_stig_compliance} == "true" ]
     then
-      tanzu_compliance_dir="${image_builder_root}/image/ansible/tanzu-compliance"
+      tanzu_compliance_dir="${image_builder_root}/image/tanzu-compliance"
       if [ -d "$tanzu_compliance_dir" ]
       then
         rm -rf ${tanzu_compliance_dir}
