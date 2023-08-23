@@ -11,6 +11,7 @@ vSphere Tanzu Kubernetes Grid Image Builder provides tooling that can be used to
 - [Debugging](#debugging)
 - [Contributing](#contributing)
 - [License](#license)
+- [Support](#support)
 
 ## Prerequisites
 
@@ -138,6 +139,11 @@ The vSphere Tanzu Kubernetes Grid Image Builder project team welcomes contributi
 ## License
 
 This project is available under the [Mozilla Public License, V2.0][project-license].
+
+## Support
+
+VMware will fully support issues with BYOI, but the customer is responsible for any issues relating to their custom application/customizations. Customers can open support tickets regarding their BYOI Clusters; however, VMware support will be limited to best effort support basis only, with support having full discretion of how much effort to put in to troubleshooting. Upon opening a case with VMware Support regarding any issue with a BYOI Cluster, VMware Support asks that the customer supplies support with the exact changes made to the base image.
+
 
 [//]: Links
 
