@@ -8,6 +8,7 @@ vSphere Tanzu Kubernetes Grid Image Builder provides tooling that can be used to
 - [Building Images](#building-images)
 - [Make Targets](#make-targets)
 - [Customization Examples](#customizations-examples)
+- [Blog](#blog)
 - [Debugging](#debugging)
 - [Contributing](#contributing)
 - [License](#license)
@@ -123,7 +124,11 @@ make build-node-image OS_TARGET=photon-3 KUBERNETES_VERSION=v1.23.15+vmware.1 TK
 
 ## Customizations Examples
 
-Sample customization examples can be found [here](docs/examples/README.md)
+Sample customization examples can be found [here](docs/examples/README.md).
+
+## Blog
+
+Refer to the blog post [Building Custom Tanzu Kubernetes Releases for vSphere with Tanzu](https://williamlam.com/2023/07/building-custom-tanzu-kubernetes-releases-tkr-for-vsphere-with-tanzu.html) for  step-by-step instructions on building custom Tanzu Kubernetes releases for use with vSphere with Tanzu.
 
 ## Debugging
 
