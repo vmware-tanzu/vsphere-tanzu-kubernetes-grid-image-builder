@@ -128,7 +128,7 @@ Sample customization examples can be found [here](docs/examples/README.md).
 
 ## Blog
 
-Refer to the blog post [Building Custom Tanzu Kubernetes Releases for vSphere with Tanzu](https://williamlam.com/2023/07/building-custom-tanzu-kubernetes-releases-tkr-for-vsphere-with-tanzu.html) for  step-by-step instructions on building custom Tanzu Kubernetes releases for use with vSphere with Tanzu.
+Refer to the blog post [Building Custom Tanzu Kubernetes Releases for vSphere with Tanzu](https://williamlam.com/2023/07/building-custom-tanzu-kubernetes-releases-tkr-for-vsphere-with-tanzu.html) for  step-by-step instructions on building custom Tanzu Kubernetes releases for use with TKG on Supervisor.
 
 ## Debugging
 
