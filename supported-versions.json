@@ -12,5 +12,12 @@
         "extra_params": {
             "image_builder_commit": "e5c6813621e13b3efc0f5181241673006fa643d9"
         }
+    },
+    "v1.26.5+vmware.2-fips.1" : {
+        "supported_os": ["photon-3", "ubuntu-2004-efi"],
+        "artifacts_image": "projects.registry.vmware.com/tkg/tkg-vsphere-linux-resource-bundle:v1.26.5_vmware.2-fips.1-tkg.1",
+        "extra_params": {
+            "image_builder_commit": "e5c6813621e13b3efc0f5181241673006fa643d9"
+        }
     }
 }
