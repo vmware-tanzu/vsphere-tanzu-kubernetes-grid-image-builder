@@ -135,6 +135,10 @@ The vSphere Tanzu Kubernetes Grid Image Builder project team welcomes contributi
 
 This project is available under the [Mozilla Public License, V2.0][project-license].
 
+## Support
+
+VMware will support issues with the vSphere Tanzu Kubernetes Grid Image Builder, but you are responsible for any issues relating to your image customizations and custom applications. You can open VMware Support cases for TKG clusters built with a custom Tanzu Kubernetes release image, however, VMware Support will be limited to best effort only, with VMware Support having full discretion over how much effort to put in to troubleshooting. On opening a case with VMware Support regarding any issue with a cluster built with a custom Tanzu Kubernetes release image, VMware Support asks that you provide support staff with the exact changes made to the base image.
+
 [//]: Links
 
 [contributing]: CONTRIBUTING.md
