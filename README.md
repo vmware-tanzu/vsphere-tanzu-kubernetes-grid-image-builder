@@ -142,7 +142,7 @@ This project is available under the [Mozilla Public License, V2.0][project-licen
 
 ## Support
 
-VMware will fully support issues with BYOI, but the customer is responsible for any issues relating to their custom application/customizations. Customers can open support tickets regarding their BYOI Clusters; however, VMware support will be limited to best effort support basis only, with support having full discretion of how much effort to put in to troubleshooting. Upon opening a case with VMware Support regarding any issue with a BYOI Cluster, VMware Support asks that the customer supplies support with the exact changes made to the base image.
+VMware will support issues with the vSphere Tanzu Kubernetes Grid Image Builder, but you are responsible for any issues relating to your image customizations and custom applications. You can open VMware support cases for TKG clusters built with a custom Tanzu Kubernetes release image, however, VMware Support will be limited to best effort only, with VMware Support having full discretion over how much effort to put in to troubleshooting. On opening a case with VMware Support regarding any issue with a cluster built with a custom Tanzu Kubernetes release image, VMware Support asks that you provide support staff with the exact changes made to the base image.
 
 
 [//]: Links
