@@ -31,7 +31,7 @@ _**Note**: If you are building just the Ubuntu OS node image you will not have t
 
 [kubernetes image builder][kubernetes-image-builder] provides `extra_repos` packer variables through which sources/repositories can be configured for both Photon and Ubuntu. As there is a difference in how Ubuntu/Photon sources are configured we need to have separate source files for Photon/Ubuntu.
 
-- Create new folder `repos` in [ansible files](./../../../ansible/files/) folder
+- Create new folder `repos` in [ansible files][ansible-files] folder
 - Create a new file for Photon sources called `photon.repo` in the `repos` folder. Refer below for sample content and refer to the official Photon [document][photon-repo-doc] for more information
 
 ```text
@@ -100,9 +100,9 @@ To remove the extra repositories/sources that were configured during the image b
 
 [//]: Links
 
-[ansible-files]: [./../../../ansible/files/]
+[ansible-files]: ./../../ansible/files/
 [customizations-doc]: https://image-builder.sigs.k8s.io/capi/capi.html#customization
-[default-args]: [./../../../packer-variables/default-args.j2]
+[default-args]: ./../../packer-variables/default-args.j2
 [jinja]: https://jinja.palletsprojects.com/en/3.1.x/
 [kubernetes-image-builder]: https://github.com/kubernetes-sigs/image-builder/
 [photon-repo-doc]: https://vmware.github.io/photon/assets/files/html/3.0/photon_admin/adding-a-new-repository.html

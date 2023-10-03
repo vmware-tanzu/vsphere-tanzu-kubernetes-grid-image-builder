@@ -1,10 +1,10 @@
 # Copyright 2023 VMware, Inc.
 # SPDX-License-Identifier: MPL-2.0
 
-FROM photon:3.0
+FROM photon:4.0
 
-ARG PACKER_VERSION=1.9.1
-ARG ANSIBLE_VERSION=2.11.5
+ARG IMAGE_BUILDER_COMMIT_ID=""
+ARG ANSIBLE_VERSION=2.12.8
 ARG IMAGE_BUILDER_REPO_NAME=image-builder
 
 ENV PATH=${PATH}:/ovftool
@@ -15,18 +15,10 @@ RUN tdnf -y update
 RUN tdnf -y upgrade
 
 # Install required packages
-RUN for package in unzip git wget build-essential python3.8 python3-pip python-jinja2 jq coreutils openssh-server; do tdnf -y install "$package"; done
-
-# Install Packer
-RUN wget https://releases.hashicorp.com/packer/"$PACKER_VERSION"/packer_"$PACKER_VERSION"_linux_amd64.zip
-RUN unzip packer_"$PACKER_VERSION"_linux_amd64.zip -d /tmp/
-RUN mv /tmp/packer /usr/local/bin/
-
-# Install Ansible
-RUN pip3 install ansible-core==$ANSIBLE_VERSION
+RUN for package in unzip git wget build-essential python3-pip jq coreutils openssh-server; do tdnf -y install "$package"; done
 
 # Install Semver
-RUN pip3 install semver
+RUN pip3 install semver jinja2
 
 # Install ovftool
 # TODO: this URL might change or expire so need to look at better way to install it on the container.
@@ -37,7 +29,14 @@ RUN unzip VMware-ovftool-4.4.3-18663434-lin.x86_64.zip -d /
 RUN git clone https://github.com/kubernetes-sigs/image-builder.git
 WORKDIR $IMAGE_BUILDER_REPO_NAME
 
-# Running deps-ova to setup packer goss provisioner
+RUN git checkout $IMAGE_BUILDER_COMMIT_ID
+
+# Install Ansible
+RUN pip3 install ansible-core==$ANSIBLE_VERSION
+# Set the environment variable where packer will be installed
+ENV PATH=${PATH}:/image-builder/images/capi/.local/bin
+
+# Running deps-ova to setup packer, goss provisioner and other ansible galaxy collections
 WORKDIR images/capi
 RUN make deps-ova
 
