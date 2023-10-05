@@ -51,3 +51,14 @@ function get_node_image_builder_container_labels() {
     os_target=$2
     echo "-l byoi -l byoi_image_builder -l $kubernetes_version -l $os_target"
 }
+
+function get_image_builder_container_image_name() {
+    kubernetes_version=$1
+    default_image_name="vsphere-tanzu-byoi"
+    image_name=$default_image_name
+
+    # Docker image name doesn't support `+` so replace them with `---`
+    kubernetes_version=${kubernetes_version//+/---}
+    image_name=$image_name-$kubernetes_version
+    echo "$image_name"
+}

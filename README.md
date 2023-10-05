@@ -105,11 +105,11 @@ make run-artifacts-container PRINT_HELP=y                                       
 make run-artifacts-container KUBERNETES_VERSION=v1.22.13+vmware.1 ARTIFACTS_CONTAINER_PORT=9090 # To run 1.22.13 Kubernetes artifacts container on port 9090
 ```
 
-- `make build-container` is used to build the image builder container locally with all the dependencies like `Packer`, `Ansible`, and `OVF Tool`.
+- `make build-image-builder-container` is used to build the image builder container locally with all the dependencies like `Packer`, `Ansible`, and `OVF Tool`.
 
 ```bash
 make build-image-builder-container PRINT_HELP=y # To show the help information for this target.
-make build-image-builder-container              # To create the image builder container.
+make build-image-builder-container KUBERNETES_VERSION=v1.23.15+vmware.1 # To create the image builder container.
 ```
 
 - `make build-node-image` is used to build the vSphere Tanzu compatible node image for a Kubernetes version.

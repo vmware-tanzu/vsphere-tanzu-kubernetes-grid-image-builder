@@ -7,7 +7,6 @@ MAKEFLAGS += -s
 .EXPORT_ALL_VARIABLES:
 
 # Default variables
-BYOI_IMAGE_NAME = vsphere-tanzu-byoi
 DEFAULT_ARTIFACTS_CONTAINER_PORT = 8081
 DEFAULT_PACKER_HTTP_PORT = 8082
 MAKE_HELPERS_PATH = $(shell pwd)/hack/make-helpers
@@ -57,8 +56,11 @@ define BUILD_IMAGE_BUILDER_CONTAINER_HELP_INFO
 # Will create a docker container image for creation of TKGs OVA with the dependencies
 # like packer, ansible and kubernetes image builder code.
 # 
+# Arguments:
+#   KUBERNETES_VERSION: [Required] kubernetes version of the artifacts containers, to see
+#                       list of supported kubernetes versions use "make list-versions".
 # Example:
-# make build-image-builder-container
+# make build-image-builder-container KUBERNETES_VERSION=v1.23.15+vmware.1
 endef
 .PHONY: build-image-builder-container
 ifeq ($(PRINT_HELP),y)
@@ -66,7 +68,7 @@ build-image-builder-container:
 	printf "$$green$$BUILD_IMAGE_BUILDER_CONTAINER_HELP_INFO$$clear\n"
 else
 build-image-builder-container:
-	docker build --platform=linux/amd64 -q -t $(BYOI_IMAGE_NAME) .
+	$(MAKE_HELPERS_PATH)/build-image-builder-container.sh
 endif
 
 define BUILD_NODE_IMAGE
