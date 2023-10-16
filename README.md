@@ -11,6 +11,7 @@ vSphere Tanzu Kubernetes Grid Image Builder provides tooling that can be used to
 - [Debugging](#debugging)
 - [Contributing](#contributing)
 - [License](#license)
+- [Support](#support)
 
 ## Prerequisites
 
