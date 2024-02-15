@@ -17,7 +17,7 @@ vSphere Tanzu Kubernetes Grid Image Builder provides tooling that can be used to
 Below are the prerequisites for building the node images
 
 - vSphere Environment version >= 8.0
-- DCHP configured for vCenter (required by Packer)
+- DHCP configured for vCenter (required by Packer)
 - `jq` version >= `1.6`
 - `make` version >= `4.2.1`
 - `docker` version >= `20.10.21`
