@@ -4,7 +4,7 @@
 FROM photon:4.0
 
 ARG IMAGE_BUILDER_COMMIT_ID=""
-ARG ANSIBLE_VERSION=2.12.8
+ARG ANSIBLE_VERSION=2.15.10
 ARG IMAGE_BUILDER_REPO_NAME=image-builder
 
 ENV PATH=${PATH}:/ovftool
@@ -38,6 +38,11 @@ ENV PATH=${PATH}:/image-builder/images/capi/.local/bin
 
 # Running deps-ova to setup packer, goss provisioner and other ansible galaxy collections
 WORKDIR images/capi
+
+# This version of ansible requires locale to be set explicitly.
+ENV LANG=en_US.UTF-8
+ENV LC_ALL=en_US.UTF-8
+
 RUN make deps-ova
 
 # Make sure packer, ansible and ovftool are installed properly
