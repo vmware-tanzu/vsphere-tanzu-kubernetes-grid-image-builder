@@ -104,6 +104,10 @@ def populate_jinja_args(args):
     jinja_args_map["kubernetes_version"] = jinja_args_map["kubernetes"]
     jinja_args_map["kubernetes_series"] = jinja_args_map["kubernetes"].split('+')[0]
 
+    # gateway-api package is not present for TKRs upto v1.26.x. gateway_package_present can be used
+    # to determine if carvel package of gateway-api should be present depending on TKR version.
+    jinja_args_map["gateway_package_present"] = jinja_args_map["kubernetes_series"] > "v1.26"
+
     # Set STIG compliant value
     jinja_args_map["photon3_stig_compliance"] = "false"
     if args.os_type == "photon-3":
