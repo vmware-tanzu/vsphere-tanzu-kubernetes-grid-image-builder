@@ -102,12 +102,18 @@ def populate_jinja_args(args):
         kubernetes_args = json.loads(fp.read())
     jinja_args_map.update(kubernetes_args)
     jinja_args_map["kubernetes_version"] = jinja_args_map["kubernetes"]
-    jinja_args_map["kubernetes_series"] = jinja_args_map["kubernetes"].split('+')[0]
+    kubernetes_series = jinja_args_map["kubernetes"].split('+')[0]
+    jinja_args_map["kubernetes_series"] = kubernetes_series
+
+    if kubernetes_series.startswith("v"):
+        # Remove the leading v from version for semver module.
+        kubernetes_series = kubernetes_series[1:]
 
     # gateway-api package is not present for TKRs upto v1.26.x. gateway_package_present can be used
     # to determine if carvel package of gateway-api should be present depending on TKR version.
-    jinja_args_map["gateway_package_present"] = jinja_args_map["kubernetes_series"] > "v1.26"
-
+    jinja_args_map["gateway_package_present"] = False
+    if semver.compare(kubernetes_series, "1.26.5"):
+        jinja_args_map["gateway_package_present"] = True
     # Set STIG compliant value
     jinja_args_map["photon3_stig_compliance"] = "false"
     if args.os_type == "photon-3":
