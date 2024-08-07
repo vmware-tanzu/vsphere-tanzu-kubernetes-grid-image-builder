@@ -9,3 +9,9 @@ photon_va_hardening_url: "{{ artifacts_container_url }}/artifacts/photon_hardeni
 va_hardening_rpm_version: "3.0"
 va_hardening_rpm_release: "{{ imageVersion }}"
 carvel_tools: "/tmp/carvel-tools"
+systemd_networkd_update_initramfs: >-
+  {%- if ansible_os_family == 'VMware Photon OS' -%}
+  dracut -f
+  {%- elif ansible_os_family == 'Debian' -%}
+  update-initramfs -u
+  {%- endif -%}
