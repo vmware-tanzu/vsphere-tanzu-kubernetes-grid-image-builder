@@ -22,10 +22,6 @@
   shell: 'curl -k -X GET http://localhost:5000/v2/_catalog'
   register: image_list
 
-- name: Removing curl
-  command: tdnf remove curl -y
-  when: ansible_os_family == "VMware Photon OS"
-
 - name: Print Addon Carvel Packages List
   debug:
     var: image_list.stdout_lines

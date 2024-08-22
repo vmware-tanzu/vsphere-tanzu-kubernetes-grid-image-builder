@@ -1,7 +1,7 @@
 # Copyright 2023 VMware, Inc.
 # SPDX-License-Identifier: MPL-2.0
 
-FROM photon:4.0
+FROM photon:5.0
 
 ARG IMAGE_BUILDER_COMMIT_ID=""
 ARG ANSIBLE_VERSION=2.15.10
