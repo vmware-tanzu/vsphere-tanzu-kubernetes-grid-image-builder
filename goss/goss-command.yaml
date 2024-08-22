@@ -18,7 +18,7 @@ command:
     stderr: []
     timeout: 0
     stdout: ["coredns", "etcd", "kube-apiserver", "kube-controller-manager", "kube-proxy", "kube-scheduler", "pause"]
-  kubectl version --short --client=true -o json | jq .clientVersion.gitVersion | tr -d '"' | awk '{print substr($1,2); }':
+  kubectl version --client -o json | jq .clientVersion.gitVersion | tr -d '"' | awk '{print substr($1,2); }':
     exit-status: 0
     stdout: [{{ .Vars.kubernetes_version }}]
     stderr: []

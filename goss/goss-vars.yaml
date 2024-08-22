@@ -34,9 +34,7 @@ common_photon_rpms: &common_photon_rpms
   net-tools:
   openssl-c_rehash:
   open-vm-tools:
-  python-netifaces:
   python3-pip:
-  python-requests:
   rng-tools:
   socat:
   tar:
@@ -55,6 +53,17 @@ common_rpms: &common_rpms
   python-requests:
   socat:
   yum-utils:
+
+photon3_rpms: &photon3_rpms
+  python-netifaces:
+  python-requests:
+  dstat:
+  coreutils:
+  libdb:
+
+photon5_rpms: &photon5_rpms
+  python3-netifaces:
+  python3-requests:
 
 arch: "amd64"
 containerd_version: ""
@@ -99,6 +108,13 @@ photon:
       cloud-init:
       cloud-utils:
       python3-netifaces:
+    os_version:
+      - distro_version: "3.0"
+        package:
+          <<: *photon3_rpms
+      - distro_version: "5.0"
+        package:
+          <<: *photon5_rpms
 
 # This section contains everything unique to TKG
 tkg:
@@ -126,7 +142,6 @@ tkg:
       shadow:
       procps-ng:
       iana-etc:
-      coreutils:
       bc:
       libtool:
       findutils:
@@ -157,7 +172,6 @@ tkg:
       cpio:
       gzip:
       vim:
-      libdb:
       tdnf:
       less:
       iputils:
@@ -175,7 +189,6 @@ tkg:
       iotop:
       lsof:
       traceroute:
-      dstat:
       ltrace:
       ipset:
       netcat:

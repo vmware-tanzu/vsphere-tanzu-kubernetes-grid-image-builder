@@ -12,9 +12,6 @@
     path: "/etc/systemd/network/99-dhcp-en.network"
     state: absent
 
-- import_tasks: va_hardening.yml
-  when: photon3_stig_compliance != "true"
-
 - name: Enable Apparmor service
   systemd:
     name: apparmor
@@ -41,3 +38,9 @@
     backrefs: yes
     regexp: "^(photon_cmdline.*)$"
     line: '\1 cgroup.memory=nokmem systemd.legacy_systemd_cgroup_controller=yes'
+
+- name: Disable tdnf cache timer
+  systemd:
+    name: tdnf-cache-updateinfo.timer
+    enabled: no
+    state: stopped
