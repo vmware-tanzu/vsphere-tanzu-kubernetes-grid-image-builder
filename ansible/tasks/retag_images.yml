@@ -14,18 +14,6 @@
   args:
     executable: python3
 
-- name: Install curl for listing container images
-  command: tdnf install curl -y
-  when: ansible_os_family == "VMware Photon OS"
-
-- name: Fetch Addon Carvel Packages List
-  shell: 'curl -k -X GET http://localhost:5000/v2/_catalog'
-  register: image_list
-
-- name: Print Addon Carvel Packages List
-  debug:
-    var: image_list.stdout_lines
-
 - name: Stop docker registry
   shell: 'ctr -n k8s.io task kill docker-registry'
 

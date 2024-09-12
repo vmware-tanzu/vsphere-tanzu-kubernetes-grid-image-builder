@@ -97,6 +97,10 @@ ubuntu:
       cloud-initramfs-copymods:
       cloud-initramfs-dyn-netconf:
 photon:
+  common-service:
+    apparmor:
+      enabled: true
+      running: true
   common-kernel-param:
     net.ipv4.tcp_limit_output_bytes:
       value: "524288"
@@ -104,6 +108,16 @@ photon:
     <<: *common_photon_rpms
     libseccomp:
   ova:
+    command:
+      grep apparmor=1 /boot/photon.cfg:
+        exit-status: 0
+        stdout: ["apparmor=1"]
+        stderr: []
+        timeout: 0
+    service:
+      networkd-dispatcher:
+        enabled: true
+        running: true
     package:
       cloud-init:
       cloud-utils:
@@ -196,6 +210,9 @@ tkg:
       wget:
     command:
     service:
+      sshd.service:
+        enabled: true
+        running: true
       sshd-keygen.service:
         enabled: true
         running: false
