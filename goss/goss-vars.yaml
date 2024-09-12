@@ -4,6 +4,38 @@
 ---
 # Everything from here to the TKG section should be kept in sync
 # with upstream settings
+common_rpms: &common_rpms
+  audit:
+  ca-certificates:
+  cloud-init:
+  cloud-utils-growpart:
+  conntrack-tools:
+  chrony:
+  curl:
+  jq:
+  python3-pip:
+  socat:
+  sysstat:
+  yum-utils:
+
+al2_rpms: &al2_rpms
+  ebtables:
+  python-netifaces:
+  python-requests:
+
+rh7_rpms: &rh7_rpms
+  ebtables:
+  python-netifaces:
+  python-requests:
+
+rh8_rpms: &rh8_rpms
+  nftables:
+  python3-netifaces:
+  python3-requests:
+
+rh9_rpms: &rh9_rpms
+  nftables:
+
 common_debs: &common_debs
   auditd:
   apt-transport-https:
@@ -16,86 +48,164 @@ common_debs: &common_debs
   libnetfilter-acct1:
   libnetfilter-cttimeout1:
   libnetfilter-log1:
-  linux-cloud-tools-virtual:
-  linux-tools-virtual:
-  open-vm-tools:
   python3-distutils:
   python3-netifaces:
   python3-pip:
   socat:
 
+chrony_deb: &chrony_deb
+  chrony:
+  ntp:
+    skip: true
+    installed: false
+
+common_mariner_rpms: &common_mariner_rpms
+  audit:
+  ca-certificates:
+  cloud-init:
+  cloud-utils-growpart:
+  conntrack-tools:
+  chrony:
+  curl:
+  jq:
+  lsof:
+  python3-pip:
+  socat:
+  sysstat:
+
 common_photon_rpms: &common_photon_rpms
   audit:
+  apparmor-parser:
   conntrack-tools:
   chrony:
   distrib-compat:
   ebtables:
-  jq:
   net-tools:
   openssl-c_rehash:
-  open-vm-tools:
   python3-pip:
   rng-tools:
   socat:
   tar:
   unzip:
 
-common_rpms: &common_rpms
-  audit:
-  ca-certificates:
-  conntrack-tools:
-  chrony:
-  curl:
-  ebtables:
+photon_3_rpms: &photon_3_rpms
+  python-netifaces:
+  python-requests:
   jq:
-  open-vm-tools:
-  python-netifaces:
-  python-requests:
-  socat:
-  yum-utils:
-
-photon3_rpms: &photon3_rpms
-  python-netifaces:
-  python-requests:
   dstat:
   coreutils:
   libdb:
 
-photon5_rpms: &photon5_rpms
+photon_4_rpms: &photon_4_rpms
+  jq:
+
+photon_5_rpms: &photon_5_rpms
+  jq:
   python3-netifaces:
   python3-requests:
 
 arch: "amd64"
 containerd_version: ""
-kubernetes_cni_source_type: "http"
+containerd_wasm_shims_runtimes: ""
+kubernetes_cni_source_type: ""
 kubernetes_cni_version: ""
-kubernetes_source_type: "http"
+kubernetes_source_type: ""
 kubernetes_version: ""
-kubernetes_load_additional_imgs: true
+kubernetes_rpm_version: ""
+kubernetes_deb_version: ""
+kubernetes_cni_deb_version: ""
+kubernetes_cni_rpm_version: ""
+# When k8s and k8s cni source is http
+kubernetes_load_additional_imgs: false
 
-# OS Specific package/Command/Kernel Params etc...
+#windows variables
+kubernetes_install_path: ""
+windows_service_manager: ""
+distribution_version: ""
+runtime: ""
+
+# OS Specific package/Command/Kernal Params etc...
 # Structured in below format
 # OS_NAME
 #   common-package:
 #   common-kernel-params:
+#   common-services:
 #   PROVIDER_NAME:
 #     package:
 #     command:
 #     service:
 #  ...
-ubuntu:
-  common-kernel-param:
-    net.ipv4.conf.all.rp_filter:
-      value: "1"
-  common-package:
-    <<: *common_debs
-    libseccomp2:
-  ova:
+amazon linux:
+  common-package: *common_rpms
+  amazon:
+    service:
+      amazon-ssm-agent:
+        enabled: true
+        running: true
+    package:
+      awscli:
+      amazon-ssm-agent:
+      <<: *al2_rpms
+centos:
+  common-package: *common_rpms
+  amazon:
+    package:
+      amazon-ssm-agent:
+      <<: *rh7_rpms
+    command:
+      pip3 list --format=columns | grep 'awscli' | awk -F' ' '{print $1}':
+        exit-status: 0
+        stdout: ["awscli"]
+        stderr: []
+        timeout: 0
+  azure:
     package:
       open-vm-tools:
-      cloud-guest-utils:
-      cloud-initramfs-copymods:
-      cloud-initramfs-dyn-netconf:
+      azure-cli:
+  ova:
+    package:
+      python2-pip:
+      open-vm-tools:
+      <<: *rh7_rpms
+  qemu:
+    package:
+      open-vm-tools:
+      cloud-init:
+      cloud-utils-growpart:
+      python2-pip:
+      <<: *rh7_rpms
+  raw:
+    package:
+      cloud-init:
+      cloud-utils-growpart:
+      python2-pip:
+  hcloud:
+    package:
+      cloud-init:
+      cloud-utils-growpart:
+      python2-pip:
+flatcar:
+  common-service:
+    containerd:
+      enabled: true
+      running: true
+    systemd-timesyncd:
+      enabled: true
+      running: true
+  amazon:
+    command:
+  azure:
+    command:
+  qemu:
+    command:
+  raw:
+    command:
+  ova:
+    command:
+  nutanix:
+    command:
+  hcloud:
+    command:
 photon:
   common-service:
     apparmor:
@@ -106,7 +216,7 @@ photon:
       value: "524288"
   common-package:
     <<: *common_photon_rpms
-    libseccomp:
+    audit:
   ova:
     command:
       grep apparmor=1 /boot/photon.cfg:
@@ -119,16 +229,427 @@ photon:
         enabled: true
         running: true
     package:
+      open-vm-tools:
       cloud-init:
       cloud-utils:
       python3-netifaces:
     os_version:
       - distro_version: "3.0"
         package:
-          <<: *photon3_rpms
+          <<: *photon_3_rpms
+      - distro_version: "4.0"
+        package:
+          <<: *photon_4_rpms
       - distro_version: "5.0"
         package:
-          <<: *photon5_rpms
+          <<: *photon_5_rpms
+mariner:
+  common-package: *common_mariner_rpms
+  azure:
+    package:
+      open-vm-tools:
+      azure-cli:
+rockylinux:
+  common-package: *common_rpms
+  amazon:
+    package:
+      amazon-ssm-agent:
+      <<: *rh8_rpms
+    command:
+      pip3 list --format=columns | grep 'awscli' | awk -F' ' '{print $1}':
+        exit-status: 0
+        stdout: ["awscli"]
+        stderr: []
+        timeout: 0
+    service:
+      amazon-ssm-agent:
+        enabled: true
+        running: true
+  ova:
+    package:
+      open-vm-tools:
+    os_version:
+      - distro_version: "7"
+        package:
+          python2-pip:
+          <<: *rh7_rpms
+      - distro_version: "8"
+        package:
+          python2-pip:
+          <<: *rh8_rpms
+      - distro_version: "9"
+        package:
+          <<: *rh9_rpms
+  qemu:
+    package:
+      open-vm-tools:
+      cloud-init:
+      cloud-utils:
+      python3-netifaces:
+      <<: *rh8_rpms
+  raw:
+    package:
+      cloud-init:
+      cloud-utils:
+      python3-netifaces:
+      <<: *rh8_rpms
+  nutanix:
+    package:
+      cloud-init:
+      python3-netifaces:
+      iscsi-initiator-utils:
+      nfs-utils:
+      lvm2:
+      xfsprogs:
+      <<: *rh8_rpms
+    service:
+      iscsid:
+        enabled: true
+        running: false
+  hcloud:
+    package:
+      cloud-init:
+      cloud-utils-growpart:
+      python3-netifaces:
+      <<: *rh8_rpms
+rhel:
+  common-package: *common_rpms
+  amazon:
+    package:
+      amazon-ssm-agent:
+    os_version:
+      - distro_version: "8"
+        package:
+          <<: *rh8_rpms
+    command:
+      pip3 list --format=columns | grep 'awscli' | awk -F' ' '{print $1}':
+        exit-status: 0
+        stdout: ["awscli"]
+        stderr: []
+        timeout: 0
+    service:
+      amazon-ssm-agent:
+        enabled: true
+        running: true
+  azure:
+    package:
+      open-vm-tools:
+      azure-cli:
+    os_version:
+      - distro_version: "8"
+        package:
+          <<: *rh8_rpms
+  gcp:
+    command:
+      find -L /bin -maxdepth 1 -type f -executable -printf "%f\n" | grep -Fx 'gcloud':
+        exit-status: 0
+        stdout: ["gcloud"]
+        stderr: []
+        timeout: 0
+    os_version:
+      - distro_version: "8"
+        package:
+          <<: *rh8_rpms
+  ova:
+    package:
+      python2-pip:
+      open-vm-tools:
+    os_version:
+      - distro_version: "7"
+        package:
+          <<: *rh7_rpms
+      - distro_version: "8"
+        package:
+          <<: *rh8_rpms
+  qemu:
+    package:
+      open-vm-tools:
+      cloud-init:
+      cloud-utils-growpart:
+      python2-pip:
+      <<: *rh7_rpms
+  raw:
+    package:
+      cloud-init:
+      cloud-utils-growpart:
+      python2-pip:
+      <<: *rh7_rpms
+  nutanix:
+    package:
+      cloud-init:
+      python3-netifaces:
+      iscsi-initiator-utils:
+      nfs-utils:
+      lvm2:
+      xfsprogs:
+      <<: *rh8_rpms
+    service:
+      iscsid:
+        enabled: true
+        running: false
+ubuntu:
+  common-kernel-param:
+    net.ipv4.conf.all.rp_filter:
+      value: "1"
+  common-package:
+    <<: *common_debs
+  common-service:
+    apt-daily.timer:
+      enabled: false
+      running: false
+    apt-daily-upgrade.timer:
+      enabled: false
+      running: false
+  azure:
+    command:
+      pip3 list --format=columns | grep 'azure-cli' | awk -F' ' '{print $1}':
+        exit-status: 0
+        stdout: ["azure-cli"]
+        stderr: []
+        timeout: 0
+      iptables -C FORWARD -d 168.63.129.16/32 -p tcp -m tcp --dport 80 -m comment --comment "block traffic to 168.63.129.16 for cve-2021-27075" -j DROP:
+        exit-status: 0
+        timeout: 0
+      grep -z -q -E '^datasource:\n\s\sAzure:\n\s\s\s\sgiapply_network_config:\sfalse$' /etc/cloud/cloud.cfg.d/15_azure-vnet.cfg || echo $?:
+        exit-status: 0
+        stdout: []
+        stderr: []
+        timeout: 0
+        title: "Check exact for the contents in /etc/cloud/cloud.cfg.d/15_azure-vnet.cfg"
+    package:
+      open-vm-tools:
+      linux-cloud-tools-virtual:
+      linux-tools-virtual:
+      <<: *chrony_deb
+    service:
+      chrony:
+        enabled: true
+        running: true
+  amazon:
+    service:
+      snap.amazon-ssm-agent.amazon-ssm-agent.service:
+        enabled: true
+        running: true
+    package:
+      linux-cloud-tools-virtual:
+      linux-tools-virtual:
+    command:
+      snap list | grep 'amazon-ssm-agent' | awk -F' ' '{print $1}':
+        exit-status: 0
+        stdout: ["amazon-ssm-agent"]
+        stderr: []
+        timeout: 0
+      pip3 list --format=columns | grep 'awscli' | awk -F' ' '{print $1}':
+        exit-status: 0
+        stdout: ["awscli"]
+        stderr: []
+        timeout: 0
+  gcp:
+    package:
+      linux-cloud-tools-virtual:
+      linux-tools-virtual:
+    command:
+      find -L /bin -maxdepth 1 -type f -executable -printf "%f\n" | grep -Fx 'gcloud':
+        exit-status: 0
+        stdout: ["gcloud"]
+        stderr: []
+        timeout: 0
+  oci:
+    service:
+    package:
+    command:
+  outscale:
+    package:
+      linux-cloud-tools-virtual:
+      linux-tools-virtual:
+  ova:
+    service:
+      networkd-dispatcher:
+        enabled: true
+        running: true
+    package:
+      linux-cloud-tools-virtual:
+      linux-tools-virtual:
+      open-vm-tools:
+      cloud-guest-utils:
+      cloud-initramfs-copymods:
+      cloud-initramfs-dyn-netconf:
+  qemu:
+    service:
+      networkd-dispatcher:
+        enabled: true
+        running: true
+    package:
+      linux-cloud-tools-virtual:
+      linux-tools-virtual:
+      open-vm-tools:
+      cloud-guest-utils:
+      cloud-initramfs-copymods:
+      cloud-initramfs-dyn-netconf:
+  raw:
+    package:
+      cloud-guest-utils:
+      cloud-initramfs-copymods:
+      cloud-initramfs-dyn-netconf:
+      linux-cloud-tools-generic:
+      linux-tools-generic:
+  nutanix:
+    package:
+      linux-cloud-tools-virtual:
+      linux-tools-virtual:
+      cloud-guest-utils:
+      cloud-initramfs-copymods:
+      cloud-initramfs-dyn-netconf:
+      open-iscsi:
+      xfsprogs:
+      mdadm:
+      nfs-common:
+    service:
+      iscsid:
+        enabled: true
+        running: false
+  hcloud:
+    package:
+      cloud-guest-utils:
+      cloud-initramfs-copymods:
+      cloud-initramfs-dyn-netconf:
+      linux-cloud-tools-generic:
+      linux-tools-generic:
+
+oracle linux:
+  common-kernel-param:
+  common-package:
+    <<: *common_rpms
+  common-service:
+  oci:
+    command:
+    service:
+    package:
+      <<: *rh8_rpms
+
+# Windows specific variables
+windows:
+  common-windows-features:
+    Hyper-V-PowerShell:
+      expected:
+        - Installed
+    Containers:
+      expected:
+        - Installed
+
+  common-files:
+    c:/etc/kubernetes/pki:
+      exists: true
+      filetype: directory
+      contains:
+    c:/etc/kubernetes:
+      exists: true
+      filetype: directory
+      contains:
+    c:/etc/kubernetes/manifests:
+      exists: true
+      filetype: directory
+      contains:
+    c:/var/log/kubelet:
+      exists: true
+      filetype: directory
+      contains:
+
+  common-windows-service:
+    cloudbase-init:
+      expected:
+        - Manual
+        - Stopped
+    kubelet:
+      expected:
+        - Automatic
+        - "/RequiredServices.+:.+(containerd|docker)/"
+    sshd:
+      expected:
+        - Automatic
+        - Running
+
+  azure:
+    windows-service:
+
+    files:
+      'c:/program files/Cloudbase Solutions/Cloudbase-init/conf/cloudbase-init.conf': 
+        exists: true
+        filetype: file
+        contains:
+          - "COM2,115200,N,8"
+          - "metadata_services=cloudbaseinit.metadata.services.azureservice.AzureService"
+          - "cloudbaseinit.plugins.common.userdata.UserDataPlugin"
+          - "cloudbaseinit.plugins.windows.createuser.CreateUserPlugin"
+          - "cloudbaseinit.plugins.common.ephemeraldisk.EphemeralDiskPlugin"
+          - "cloudbaseinit.plugins.windows.azureguestagent.AzureGuestAgentPlugin"
+          - "cloudbaseinit.plugins.common.mtu.MTUPlugin"
+          - "cloudbaseinit.plugins.common.sethostname.SetHostNamePlugin"
+  ova:
+    windows-service:
+      vmtools:
+        expected:
+          - Automatic
+          - Running
+    files:
+      'c:/program files/Cloudbase Solutions/Cloudbase-init/conf/cloudbase-init.conf': 
+        exists: true
+        filetype: file
+        contains:
+          - "!/logging_serial_port=COM1,115200,N,8/"
+          - "cloudbaseinit.metadata.services.vmwareguestinfoservice.VMwareGuestInfoService"
+          - "cloudbaseinit.plugins.common.ephemeraldisk.EphemeralDiskPlugin"
+          - "cloudbaseinit.plugins.common.mtu.MTUPlugin"
+          - "cloudbaseinit.plugins.common.sethostname.SetHostNamePlugin"
+          - "cloudbaseinit.plugins.common.networkconfig.NetworkConfigPlugin"
+          - "cloudbaseinit.plugins.common.sshpublickeys.SetUserSSHPublicKeysPlugin"
+          - "cloudbaseinit.plugins.common.userdata.UserDataPlugin"
+          - "cloudbaseinit.plugins.common.localscripts.LocalScriptsPlugin"
+          - "cloudbaseinit.plugins.windows.createuser.CreateUserPlugin"
+          - "cloudbaseinit.plugins.windows.extendvolumes.ExtendVolumesPlugin"
+      'c:/program files/Cloudbase Solutions/Cloudbase-init/conf/cloudbase-init-unattend.conf': 
+        exists: true
+        filetype: file
+        contains:
+          - "metadata_services=cloudbaseinit.metadata.services.vmwareguestinfoservice.VMwareGuestInfoService"
+  amazon:
+    windows-service:
+
+    files:
+      'c:/program files/Cloudbase Solutions/Cloudbase-init/conf/cloudbase-init.conf': 
+        exists: true
+        filetype: file
+        contains:
+          - "!/logging_serial_port=COM1,115200,N,8/"
+          - "metadata_services=cloudbaseinit.metadata.services.ec2service.EC2Service"
+          - "cloudbaseinit.plugins.common.ephemeraldisk.EphemeralDiskPlugin"
+          - "cloudbaseinit.plugins.common.mtu.MTUPlugin"
+          - "cloudbaseinit.plugins.common.sethostname.SetHostNamePlugin"
+          - "cloudbaseinit.plugins.common.sshpublickeys.SetUserSSHPublicKeysPlugin"
+
+  nutanix:
+    windows-service:
+
+    files:
+      'c:/program files/Cloudbase Solutions/Cloudbase-init/conf/cloudbase-init.conf': 
+        exists: true
+        filetype: file
+        contains:
+          - "!/logging_serial_port=COM1,115200,N,8/"
+          - "cloudbaseinit.metadata.services.configdrive.ConfigDriveService"
+          - "cloudbaseinit.plugins.common.ephemeraldisk.EphemeralDiskPlugin"
+          - "cloudbaseinit.plugins.common.mtu.MTUPlugin"
+          - "cloudbaseinit.plugins.common.sethostname.SetHostNamePlugin"
+          - "cloudbaseinit.plugins.common.sshpublickeys.SetUserSSHPublicKeysPlugin"
+          - "cloudbaseinit.plugins.common.userdata.UserDataPlugin"
+          - "cloudbaseinit.plugins.common.localscripts.LocalScriptsPlugin"
+          - "cloudbaseinit.plugins.windows.createuser.CreateUserPlugin"
+          - "cloudbaseinit.plugins.windows.extendvolumes.ExtendVolumesPlugin"
+      'c:/program files/Cloudbase Solutions/Cloudbase-init/conf/cloudbase-init-unattend.conf': 
+        exists: true
+        filetype: file
+        contains:
+          - "metadata_services=cloudbaseinit.metadata.services.base.EmptyMetadataService"
 
 # This section contains everything unique to TKG
 tkg:
@@ -143,6 +664,10 @@ tkg:
         enabled: true
     kernel-param:
     ova:
+      os_version:
+        - distro_version: "22.04"
+          package:
+            dkms:
       kernel-param:
   photon:
     package:
@@ -218,4 +743,8 @@ tkg:
         running: false
     kernel-param:
     ova:
+      os_version:
+        - distro_version: "5.0"
+          package:
+            dkms:
       kernel-param:
