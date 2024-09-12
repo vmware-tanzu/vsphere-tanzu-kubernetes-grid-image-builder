@@ -6,7 +6,7 @@ set -e
 set -x
 
 # Default variables
-image_builder_root=/image-builder/images/capi
+image_builder_root=${IB_ROOT:-"/image-builder/images/capi"}
 default_packer_variables=${image_builder_root}/image/packer-variables/
 packer_configuration_folder=${image_builder_root}
 tkr_metadata_folder=${image_builder_root}/tkr-metadata/
@@ -25,10 +25,10 @@ function download_configuration_files() {
     wget -q http://${HOST_IP}:${ARTIFACTS_CONTAINER_PORT}/artifacts/metadata/kubernetes_config.json
 
     # Download tkr-bom and tkr metadata files
-    wget -q http://${HOST_IP}:${ARTIFACTS_CONTAINER_PORT}/artifacts/tkr-bom/tkr-bom.yaml
+    # wget -q http://${HOST_IP}:${ARTIFACTS_CONTAINER_PORT}/artifacts/tkr-bom/tkr-bom.yaml
     wget -q http://${HOST_IP}:${ARTIFACTS_CONTAINER_PORT}/artifacts/metadata/unified-tkr-vsphere.tar.gz
     mkdir ${tkr_metadata_folder}
-    tar xzf unified-tkr-vsphere.tar.gz -C ./tkr-metadata
+    tar xzf unified-tkr-vsphere.tar.gz -C ${tkr_metadata_folder}
 
     # Download compatibility files
     wget -q http://${HOST_IP}:${ARTIFACTS_CONTAINER_PORT}/artifacts/metadata/compatibility/vmware-system.compatibilityoffering.json

@@ -2,3 +2,4 @@
 .vscode
 !.gitignore
 scripts/__pycache__
+output*
