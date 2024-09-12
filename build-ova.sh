@@ -14,6 +14,7 @@ custom_ovf_properties_file=${image_builder_root}/custom_ovf_properties.json
 artifacts_output_folder=${image_builder_root}/artifacts
 ova_destination_folder=${artifacts_output_folder}/ovas
 photon_stig_compliance="false"
+ova_ts_suffix=$(date +%Y%m%d%H%M%S)
 
 function copy_custom_image_builder_files() {
     cp image/hack/tkgs-image-build-ova.py hack/image-build-ova.py
@@ -48,7 +49,8 @@ function generate_packager_configuration() {
     --tkr_suffix ${TKR_SUFFIX} \
     --kubernetes_config ${image_builder_root}/kubernetes_config.json \
     --ova_destination_folder ${ova_destination_folder} \
-    --os_type ${OS_TARGET}
+    --os_type ${OS_TARGET} \
+    --ova_ts_suffix ${ova_ts_suffix}
 
     echo "Image Builder Packer Variables"
     cat ${packer_configuration_folder}/packer-variables.json
@@ -108,7 +110,8 @@ function packer_logging() {
 
 # Invokes kubernetes image builder for the corresponding OS target
 function trigger_image_builder() {
-    PATH=$PATH:/home/imgbuilder-ova/.local/bin PACKER_CACHE_DIR=/image-builder/packer_cache \
+    EXTRA_ARGS=""
+    ON_ERROR_ASK=1 PATH=$PATH:/home/imgbuilder-ova/.local/bin PACKER_CACHE_DIR=/image-builder/packer_cache \
     PACKER_VAR_FILES="${image_builder_root}/packer-variables.json"  \
     OVF_CUSTOM_PROPERTIES=${custom_ovf_properties_file} \
     IB_OVFTOOL=1 ANSIBLE_TIMEOUT=180 IB_OVFTOOL_ARGS="--allowExtraConfig" \
@@ -122,7 +125,8 @@ function copy_ova() {
     --kubernetes_config ${image_builder_root}/kubernetes_config.json \
     --tkr_metadata_folder ${tkr_metadata_folder} \
     --tkr_suffix ${TKR_SUFFIX} --os_type ${OS_TARGET} \
-    --ova_destination_folder ${ova_destination_folder}
+    --ova_destination_folder ${ova_destination_folder} \
+    --ova_ts_suffix ${ova_ts_suffix}
 }
 
 function main() {

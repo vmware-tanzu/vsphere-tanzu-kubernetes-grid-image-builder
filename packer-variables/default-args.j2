@@ -44,7 +44,7 @@
     "disable_public_repos": "false",
     "remove_extra_repos": "true",
     {# Packer VM name #}
-    "build_version": "{{ os_type }}-kube-{{ kubernetes_series }}",
+    "build_version": "{{ os_type }}-kube-{{ kubernetes_series }}-{{ ova_ts_suffix }}",
     "custom_role": "true",
     {# If a custom role is create in a different location append that
     location after mounting that Path using docker #}
