@@ -113,10 +113,11 @@ def populate_jinja_args(args):
         # Remove the leading v from version for semver module.
         kubernetes_series = kubernetes_series[1:]
 
+    k8sversion = semver.Version.parse(kubernetes_series)
     # gateway-api package is not present for TKRs upto v1.26.x. gateway_package_present can be used
     # to determine if carvel package of gateway-api should be present depending on TKR version.
     jinja_args_map["gateway_package_present"] = False
-    if semver.compare(kubernetes_series, "1.26.5"):
+    if semver.Version(k8sversion.major, k8sversion.minor, k8sversion.patch).compare("1.27.0") >= 0:
         jinja_args_map["gateway_package_present"] = True
     # Populate the ova_ts_suffix
     jinja_args_map["ova_ts_suffix"] = args.ova_ts_suffix
