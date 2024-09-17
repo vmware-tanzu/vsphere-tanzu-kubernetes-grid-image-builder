@@ -61,3 +61,20 @@
 - name: Clean up cloud-init
   command:
     cmd: cloud-init clean --seed --logs
+
+# Upstream image-builder creates this config as we are again doing the cloud-init clean
+# this file will be removed so creating the ds-identify.cfg for Ubuntu 22.04 or above
+- name: Create cloud-init datasource config file
+  copy:
+    dest: /etc/cloud/ds-identify.cfg
+    force: true
+    content: |
+      datasource: VMware
+  when: ansible_distribution_version is version('22.04', '>=')
+
+# sudo apt-get install --install-recommends linux-generic-hwe-22.04
+- name: Enabling Ubuntu HWE kernel
+  ansible.builtin.apt:
+    install_recommends: true
+    name: linux-generic-hwe-{{ ansible_distribution_version }}
+  when: ( enable_ubuntu_hwe is defined ) and ( enable_ubuntu_hwe|bool == True )

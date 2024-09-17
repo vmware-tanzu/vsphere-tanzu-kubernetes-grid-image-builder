@@ -51,6 +51,8 @@ def parse_args():
                              help='Path to the final packer destination config file')
     setup_group.add_argument('--ova_destination_folder', required=True,
                              help='Destination folder to copy the OVA after changing the name')
+    setup_group.add_argument('--ova_ts_suffix', required=True,
+                             help='Suffix to be attached to generate the OVA name')
 
     ova_copy_group = sub_parsers.add_parser("copy_ova")
     ova_copy_group.add_argument('--kubernetes_config', required=True,
@@ -63,6 +65,8 @@ def parse_args():
                                 help='Suffix to be added to the TKR, OVA and OSImage')
     ova_copy_group.add_argument('--ova_destination_folder', required=True,
                                 help='Destination folder to copy the OVA after changing the name')
+    ova_copy_group.add_argument('--ova_ts_suffix', required=True,
+                                help='Suffix to be attached to generate the OVA name')
     args = parser.parse_args()
     return args
 
@@ -109,11 +113,15 @@ def populate_jinja_args(args):
         # Remove the leading v from version for semver module.
         kubernetes_series = kubernetes_series[1:]
 
+    k8sversion = semver.Version.parse(kubernetes_series)
     # gateway-api package is not present for TKRs upto v1.26.x. gateway_package_present can be used
     # to determine if carvel package of gateway-api should be present depending on TKR version.
     jinja_args_map["gateway_package_present"] = False
-    if semver.compare(kubernetes_series, "1.26.5"):
+    if semver.Version(k8sversion.major, k8sversion.minor, k8sversion.patch).compare("1.27.0") >= 0:
         jinja_args_map["gateway_package_present"] = True
+    # Populate the ova_ts_suffix
+    jinja_args_map["ova_ts_suffix"] = args.ova_ts_suffix
+
     # Set STIG compliant value
     jinja_args_map["photon_stig_compliance"] = "false"
     if args.os_type in ("photon-3", "photon-5"):
@@ -127,7 +135,7 @@ def populate_jinja_args(args):
 def get_images_local_host_path(args):
     """
     Get the localhost paths based on the Package objects from the
-    TKR metadata that will be used for by imgpkg to upload the 
+    TKR metadata that will be used for by imgpkg to upload the
     thick tar files to local docker registry during the image build.
     """
     packages_folder = os.path.join(args.tkr_metadata_folder, "packages")
@@ -161,7 +169,7 @@ def copy_ova(args):
     """
     Copy the OVA from output folder to destination folder after changing the OVA name.
     """
-    default_ova_destination_folder = '/image-builder/images/capi/output/{}-kube-{}/'
+    default_ova_destination_folder = '/image-builder/images/capi/output/{}-kube-{}-{}/'
     config_folder = os.path.join(args.tkr_metadata_folder, "config")
     new_ova_name = ''
     for filename in os.listdir(config_folder):
@@ -176,7 +184,7 @@ def copy_ova(args):
     with open(args.kubernetes_config, 'r') as fp:
         kubernetes_args = json.loads(fp.read())
         default_ova_destination_folder = \
-            default_ova_destination_folder.format(args.os_type, kubernetes_args["kubernetes"].split('+')[0])
+            default_ova_destination_folder.format(args.os_type, kubernetes_args["kubernetes"].split('+')[0], args.ova_ts_suffix)
         old_ova_name = "{}-{}.ova".format(args.os_type, kubernetes_args["kubernetes"].replace('+', '---'))
 
     new_path = os.path.join(args.ova_destination_folder, new_ova_name)
@@ -320,7 +328,7 @@ def update_cbt(cbt_file, cbt_name, old_tkr_name, new_tkr_name):
             if "secretRef" in cbt_data["spec"]["additionalPackages"][index]["valuesFrom"]:
                 cbt_data["spec"]["additionalPackages"][index]["valuesFrom"]["secretRef"] = \
                     cbt_data["spec"]["additionalPackages"][index]["valuesFrom"]["secretRef"].replace(old_tkr_name,
-                                                                                                    new_tkr_name)
+                                                                                                     new_tkr_name)
     with open(cbt_file, 'w') as fp:
         yaml.dump(cbt_data, fp)
     print("New CBT Name:", cbt_name)
@@ -351,12 +359,17 @@ def render_folder_and_append(folder):
     applies the Jinja2 templating using jinja_args_map dictionary.
     """
     output = {}
+    print("Listing files to render and append:")
     for filename in os.listdir(folder):
         if "versionManifest" in filename:
             continue
         file = os.path.join(folder, filename)
+        env = Environment(
+            extensions=['jinja2_time.TimeExtension'],
+            loader=BaseLoader
+        )
         with open(file, 'r') as fp:
-            temp = Environment(loader=BaseLoader).from_string(fp.read())
+            temp = env.from_string(fp.read())
             output.update(json.loads(temp.render(jinja_args_map)))
     return output
 

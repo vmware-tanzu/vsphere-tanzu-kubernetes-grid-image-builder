@@ -15,10 +15,10 @@ RUN tdnf -y update
 RUN tdnf -y upgrade
 
 # Install required packages
-RUN for package in unzip git wget build-essential python3-pip jq coreutils openssh-server; do tdnf -y install "$package"; done
+RUN for package in unzip git wget build-essential python3-pip jq coreutils openssh-server xorriso; do tdnf -y install "$package"; done
 
 # Install Semver
-RUN pip3 install semver jinja2
+RUN pip3 install semver jinja2 jinja2-time
 
 # Install ovftool
 # TODO: this URL might change or expire so need to look at better way to install it on the container.
