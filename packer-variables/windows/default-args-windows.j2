@@ -33,5 +33,6 @@
   "wins_url": "",
   "custom_role": "true",
   "custom_role_names": "/image-builder/images/capi/image/ansible-windows",
-  "ansible_user_vars": "artifacts_container_url=http://{{ host_ip }}:{{ artifacts_container_port }} imageVersion={{ image_version|replace('-', '.') }} registry_store_archive_url=http://{{ host_ip }}:{{ artifacts_container_port }}/artifacts/{{ kubernetes_version }}/registries/{{ registry_store_path }}"
+  "ansible_user_vars": "artifacts_container_url=http://{{ host_ip }}:{{ artifacts_container_port }} imageVersion={{ image_version|replace('-', '.') }} registry_store_archive_url=http://{{ host_ip }}:{{ artifacts_container_port }}/artifacts/{{ kubernetes_version }}/registries/{{ registry_store_path }}",
+  "debug_tools": "false"
 }

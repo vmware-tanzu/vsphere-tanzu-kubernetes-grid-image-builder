@@ -32,6 +32,7 @@ fi
 function build_node_image() {
     docker rm -f $(get_node_image_builder_container_name "$KUBERNETES_VERSION" "$OS_TARGET")
 
+    # allow unattanded anwer file to be overriden
     AUTO_UNATTEND_ANSWER_FILE_BIND=
     [ -n "$AUTO_UNATTEND_ANSWER_FILE_PATH" ] && AUTO_UNATTEND_ANSWER_FILE_BIND="-v ${AUTO_UNATTEND_ANSWER_FILE_PATH}:/image-builder/images/capi/packer/ova/windows/${OS_TARGET}/autounattend.xml"
 
@@ -83,6 +84,7 @@ function build_node_image() {
         ${OVERRIDE_REPO_MOUNTS} \
         ${INCONTAINER_ADDITIONAL_PACKER_VAR_ENV} \
         ${INCONTAINER_OVERRIDE_REPO_ENV} \
+        ${AUTO_UNATTEND_ANSWER_FILE_BIND} \
         -w /image-builder/images/capi/ \
         -e HOST_IP=$HOST_IP -e ARTIFACTS_CONTAINER_PORT=$ARTIFACTS_CONTAINER_PORT -e OS_TARGET=$OS_TARGET \
         -e TKR_SUFFIX=$TKR_SUFFIX -e KUBERNETES_VERSION=$KUBERNETES_VERSION \
