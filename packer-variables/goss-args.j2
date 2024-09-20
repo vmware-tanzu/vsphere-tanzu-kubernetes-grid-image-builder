@@ -6,5 +6,10 @@
     "goss_download_path": "/tkgs-tmp/goss-linux-amd64",
     "goss_remote_folder": "/tkgs-tmp",
     "goss_remote_path": "/tkgs-tmp/goss",
+    {% if use_artifact_server_goss %}
+    "goss_skip_install": "false",
+    "goss_url": "http://{{ host_ip }}:{{ artifacts_container_port }}/artifacts/{{ kubernetes_version }}/bin/linux/amd64/goss"
+    {% else %}
     "goss_skip_install": "true"
+    {% endif %}
 }

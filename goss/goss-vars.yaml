@@ -94,17 +94,12 @@ photon_3_rpms: &photon_3_rpms
   python-netifaces:
   python-requests:
   jq:
-  dstat:
-  coreutils:
-  libdb:
 
 photon_4_rpms: &photon_4_rpms
   jq:
 
 photon_5_rpms: &photon_5_rpms
   jq:
-  python3-netifaces:
-  python3-requests:
 
 arch: "amd64"
 containerd_version: ""
@@ -232,7 +227,6 @@ photon:
         running: true
     package:
       open-vm-tools:
-      cloud-init:
       cloud-utils:
       python3-netifaces:
     os_version:
@@ -343,8 +337,8 @@ rhel:
           <<: *rh8_rpms
   gcp:
     command:
-      find -L /bin -maxdepth 1 -type f -executable -printf "%f\n" | grep -Fx 'gcloud':
-        exit-status: 0
+      ? find -L /bin -maxdepth 1 -type f -executable -printf "%f\n" | grep -Fx 'gcloud'
+      : exit-status: 0
         stdout: ["gcloud"]
         stderr: []
         timeout: 0
@@ -409,11 +403,11 @@ ubuntu:
         stdout: ["azure-cli"]
         stderr: []
         timeout: 0
-      iptables -C FORWARD -d 168.63.129.16/32 -p tcp -m tcp --dport 80 -m comment --comment "block traffic to 168.63.129.16 for cve-2021-27075" -j DROP:
-        exit-status: 0
+      ? iptables -C FORWARD -d 168.63.129.16/32 -p tcp -m tcp --dport 80 -m comment --comment "block traffic to 168.63.129.16 for cve-2021-27075" -j DROP
+      : exit-status: 0
         timeout: 0
-      grep -z -q -E '^datasource:\n\s\sAzure:\n\s\s\s\sgiapply_network_config:\sfalse$' /etc/cloud/cloud.cfg.d/15_azure-vnet.cfg || echo $?:
-        exit-status: 0
+      ? grep -z -q -E '^datasource:\n\s\sAzure:\n\s\s\s\sgiapply_network_config:\sfalse$' /etc/cloud/cloud.cfg.d/15_azure-vnet.cfg || echo $?
+      : exit-status: 0
         stdout: []
         stderr: []
         timeout: 0
@@ -451,8 +445,8 @@ ubuntu:
       linux-cloud-tools-virtual:
       linux-tools-virtual:
     command:
-      find -L /bin -maxdepth 1 -type f -executable -printf "%f\n" | grep -Fx 'gcloud':
-        exit-status: 0
+      ? find -L /bin -maxdepth 1 -type f -executable -printf "%f\n" | grep -Fx 'gcloud'
+      : exit-status: 0
         stdout: ["gcloud"]
         stderr: []
         timeout: 0
@@ -594,8 +588,8 @@ windows:
         - Automatic 
         - Running
     files:
-      'c:/program files/Cloudbase Solutions/Cloudbase-init/conf/cloudbase-init.conf': 
-        exists: true
+      ? "c:/program files/Cloudbase Solutions/Cloudbase-init/conf/cloudbase-init.conf"
+      : exists: true
         filetype: file
         contains:
         - "!/logging_serial_port=COM1,115200,N,8/"
@@ -618,8 +612,8 @@ windows:
     windows-service:
 
     files:
-      'c:/program files/Cloudbase Solutions/Cloudbase-init/conf/cloudbase-init.conf': 
-        exists: true
+      ? "c:/program files/Cloudbase Solutions/Cloudbase-init/conf/cloudbase-init.conf"
+      : exists: true
         filetype: file
         contains:
         - "!/logging_serial_port=COM1,115200,N,8/"
@@ -633,8 +627,8 @@ windows:
     windows-service:
 
     files:
-      'c:/program files/Cloudbase Solutions/Cloudbase-init/conf/cloudbase-init.conf': 
-        exists: true
+      ? "c:/program files/Cloudbase Solutions/Cloudbase-init/conf/cloudbase-init.conf"
+      : exists: true
         filetype: file
         contains:
         - "!/logging_serial_port=COM1,115200,N,8/"
@@ -700,7 +694,6 @@ tkg:
       e2fsprogs:
       rpm:
       gawk:
-      cloud-utils:
       gptfdisk:
       nfs-utils:
       openssh:
@@ -746,6 +739,11 @@ tkg:
     kernel-param:
     ova:
       os_version:
+        - distro_version: "3.0"
+          package:
+            libdb:
+            dstat:
+            coreutils:
         - distro_version: "5.0"
           package:
             dkms:

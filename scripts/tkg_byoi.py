@@ -128,6 +128,11 @@ def populate_jinja_args(args):
     # Populate the ova_ts_suffix
     jinja_args_map["ova_ts_suffix"] = args.ova_ts_suffix
 
+    # use goss bundled inside artifact server starting v1.31.0
+    jinja_args_map["use_artifact_server_goss"] = False
+    if semver.Version.parse(kubernetes_series).compare("1.31.0") >= 0:
+        jinja_args_map["use_artifact_server_goss"] = True
+
     # capabilities-package is not present for TKrs starting v1.31.x. capabilities_package_present can be
     # used to determine if carvel package of capabilites should be present depending on the TKr version.
     jinja_args_map["capabilities_package_present"] = True

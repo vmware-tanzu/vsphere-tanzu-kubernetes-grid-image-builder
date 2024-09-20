@@ -119,12 +119,13 @@
     fstab: /tmp/tmp.fstab
 
 - name: Download goss binary
-  get_url:
+  ansible.builtin.get_url:
     url: "https://github.com/aelsabbahy/goss/releases/download/v0.3.16/goss-linux-amd64"
     dest: /tkgs-tmp/goss-linux-amd64
     mode: 0755
   retries: 5
   delay: 3
+  when: kubernetes_semver is version('v1.31.0', '<')
 
 - name: Disable containerd service
   systemd:
