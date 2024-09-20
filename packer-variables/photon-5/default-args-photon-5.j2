@@ -1,0 +1,9 @@
+{
+    "additional_ansible_user_vars": "run_sysctl_net_ipv6_conf_all_mc_forwarding=false run_sysctl_net_ipv6_conf_default_mc_forwarding=false run_sysctl_net_ipv6_conf_eth0_mc_forwarding=false run_kernel_net_ip_forward=false run_modprobe_conf=false run_fips_boot_enable=false run_openssl_fips=false run_sshd_banner=false",
+    "photon_stig_custom_role": "/image-builder/images/capi/image/compliance",
+    {# If a custom role is create in a different location append that
+    location after mounting that Path using docker #}
+    "custom_role_names": "/image-builder/images/capi/image/ansible {% if photon_stig_compliance == "true" %}{{ photon_stig_custom_role }}{% endif %}",
+    "distro_version": "5.0",
+    "extra_rpms": "glibc zlib filesystem ethtool pkg-config bash bzip2 shadow procps-ng iana-etc coreutils bc libtool findutils xz iproute2 util-linux kmod linux linux-devel iptables Linux-PAM systemd dbus file e2fsprogs rpm gawk cloud-utils gptfdisk nfs-utils openssh gdbm photon-release photon-repos haveged sed grep cpio gzip vim tdnf less iputils bindutils diffutils bridge-utils cri-tools apparmor-utils apparmor-profiles krb5 which tzdata motd sudo iotop lsof traceroute ethtool dstat ltrace ipset netcat tcpdump wget net-tools curl tar open-vm-tools libseccomp cloud-init sysstat jq conntrack dkms"
+}

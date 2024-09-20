@@ -23,9 +23,6 @@ package_api_kind = "Package"
 max_k8s_object_name_length = 63
 max_tkr_suffix_length = 8
 
-variable_files = ['default-args', 'goss-args', 'packer-http-config', 'vsphere']
-
-
 def parse_args():
     parser = argparse.ArgumentParser(
         description='Script to setup the Packer Variables for TKG BYOI')
@@ -413,21 +410,30 @@ def render_folder_and_append(folder, os_type):
         loader=BaseLoader
     )
     os_type_tokens = os_type.split('-')
-    for variable_file in variable_files:
-        platform_file = None
-        for i in range(len(os_type_tokens)+1):
-            platform_tokens = [variable_file]
-            platform_tokens.extend(os_type_tokens[0:len(os_type_tokens) - i])
-            platform_specific_name = '%s.j2' % ('-'.join(platform_tokens))
-            print(platform_specific_name)
-            if os.path.exists(os.path.join(folder, platform_specific_name)):
-                platform_file = os.path.join(folder, platform_specific_name)
-                break
-        if not platform_file:
-            raise Exception("required arg file " + variable_file + " not found")
-        with open(platform_file, 'r') as fp:
-            temp = env.from_string(fp.read())
-            output.update(json.loads(temp.render(jinja_args_map)))
+    # First read all direct files under packer-variables. 
+    # These are the default ones applicable to all.
+    # Post that add for platform specific.
+    # Non-version OS specific goes in followed by versioned ones.
+    # Expectation is that if packer-variables folder has 
+    # say, 'ubuntu' and 'ubuntu-2204' folder with files,
+    # files from 'ubuntu' get loaded first followed by 'ubuntu-2204'.
+    # This means that files in version specific folder can override any
+    # other declarations.
+    for variable_file in os.listdir(folder):
+        common_file = os.path.join(folder, variable_file)
+        if os.path.isfile(common_file):
+            with open(common_file, 'r') as fp:
+                temp = env.from_string(fp.read())
+                output.update(json.loads(temp.render(jinja_args_map)))
+    
+    for i in reversed(range(len(os_type_tokens))):
+        platform_directory = os.path.join(folder,'-'.join(os_type_tokens[0:len(os_type_tokens) - i]))
+        if os.path.isdir(platform_directory):
+            for platform_file in os.listdir(platform_directory):
+                with open(os.path.join(platform_directory, platform_file)) as fp:
+                    temp = env.from_string(fp.read())
+                    output.update(json.loads(temp.render(jinja_args_map)))
+
     return output
 
 
