@@ -185,7 +185,7 @@ def get_images_local_host_path(args):
                     kapp_key_name = key_name + '_localhost_path'
     with open(kapp_file, 'r') as fp:
         for line in fp:
-            if "image: localhost:5000/tkg/packages/kapp-controller" in line:
+            if "image: localhost:5000/tkg/packages/core/kapp-controller" in line:
                 path = ':'.join(line.strip().split('@')[0].split(':')[1:]).strip()
                 localhost_paths[kapp_key_name] = path
                 print(line)
