@@ -44,6 +44,10 @@ function generate_packager_configuration() {
     ADDITIONAL_PACKER_VAR_FILES_LIST=
     [[ -n "$ADDITIONAL_PACKER_VARIABLE_FILES" ]] && ADDITIONAL_PACKER_VAR_FILES_LIST="--additional_packer_variables ${ADDITIONAL_PACKER_VARIABLE_FILES}"
 
+    # override_package_repositories
+    OVERRIDE_PACKAGE_REPO_FILE_LIST=
+    [[ -n "${OVERRIDE_PACKAGE_REPOS}" ]] && OVERRIDE_PACKAGE_REPO_FILE_LIST="--override_package_repositories ${OVERRIDE_PACKAGE_REPOS}"
+
     python3 image/scripts/tkg_byoi.py setup \
     --host_ip ${HOST_IP} \
     --artifacts_container_port ${ARTIFACTS_CONTAINER_PORT} \
@@ -56,7 +60,8 @@ function generate_packager_configuration() {
     --ova_destination_folder ${ova_destination_folder} \
     --os_type ${OS_TARGET} \
     --ova_ts_suffix ${ova_ts_suffix} \
-    ${ADDITIONAL_PACKER_VAR_FILES_LIST}
+    ${ADDITIONAL_PACKER_VAR_FILES_LIST} \
+    ${OVERRIDE_PACKAGE_REPO_FILE_LIST}
 
     echo "Image Builder Packer Variables"
     cat ${packer_configuration_folder}/packer-variables.json

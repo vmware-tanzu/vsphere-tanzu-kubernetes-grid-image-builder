@@ -55,7 +55,10 @@ def parse_args():
                              help='Suffix to be attached to generate the OVA name')
     setup_group.add_argument('--additional_packer_variables', required=False,
                              default=None,
-                             help='Comma separated additional Image Builder overrides as json files')
+                             help='Comma separated additional Image Builder overrides as json files. The files should be given as absolute paths')
+    setup_group.add_argument('--override_package_repositories', required=False,
+                             default=None,
+                             help='Comma delimited string containing the names of files to override the image containing repository definitions. The files should be given as absolute paths')
 
     ova_copy_group = sub_parsers.add_parser("copy_ova")
     ova_copy_group.add_argument('--kubernetes_config', required=True,
@@ -430,8 +433,24 @@ def render_folder_and_append(folder, os_type):
 
 def render_default_config(args):
     packer_vars.update(render_folder_and_append(args.default_config_folder, args.os_type))
+    packer_vars.update(render_extra_repos(args.override_package_repositories))
     packer_vars.update(render_additional_packer_variables(args.additional_packer_variables))
 
+    
+
+def render_extra_repos(comma_sep_repo_list):
+    output = {}
+    if comma_sep_repo_list is not None:
+        extra_repos = ""
+        extra_repos_list = comma_sep_repo_list.split(",")
+        for repo_file in extra_repos_list:
+            # We are not using string join just because we want to make sure repo path exists
+            if os.path.exists(repo_file):
+                extra_repos = extra_repos + " " + repo_file
+        output["extra_repos"] = extra_repos.strip()
+        output["remove_extra_repos"] = "true"
+    print("Additional inflight package repos: ", json.dumps(output, indent=4))
+    return output
 
 def check_photon_stig_compliance():
     current_kubernetes_version = jinja_args_map["kubernetes_series"].replace('v', "")
