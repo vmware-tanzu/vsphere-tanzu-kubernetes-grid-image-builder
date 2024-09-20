@@ -23,10 +23,12 @@ package_api_kind = "Package"
 max_k8s_object_name_length = 63
 max_tkr_suffix_length = 8
 
+
 def parse_args():
     parser = argparse.ArgumentParser(
         description='Script to setup the Packer Variables for TKG BYOI')
-    sub_parsers = parser.add_subparsers(help="Helper functions", dest='subparser_name')
+    sub_parsers = parser.add_subparsers(
+        help="Helper functions", dest='subparser_name')
     setup_group = sub_parsers.add_parser('setup')
     setup_group.add_argument('--kubernetes_config', required=True,
                              help='Kubernetes related configuration JSON')
@@ -91,7 +93,8 @@ def setup(args):
     populate_jinja_args(args)
 
     render_default_config(args)
-    json.dump(packer_vars, open(os.path.join(args.dest_config, 'packer-variables.json'), 'w'), indent=4)
+    json.dump(packer_vars, open(os.path.join(
+        args.dest_config, 'packer-variables.json'), 'w'), indent=4)
 
     update_tkr_metadata(args)
 
@@ -128,9 +131,8 @@ def populate_jinja_args(args):
     # capabilities-package is not present for TKrs starting v1.31.x. capabilities_package_present can be
     # used to determine if carvel package of capabilites should be present depending on the TKr version.
     jinja_args_map["capabilities_package_present"] = True
-    k8sversion = semver.Version.parse(kubernetes_series)
     # When comparing ignore rc/alpha/beta notations
-    if semver.Version(k8sversion.major,k8sversion.minor,k8sversion.patch).compare("1.31.0") >= 0:
+    if semver.Version(k8sversion.major, k8sversion.minor, k8sversion.patch).compare("1.31.0") >= 0:
         jinja_args_map["capabilities_package_present"] = False
 
     # Set STIG compliant value
@@ -161,7 +163,8 @@ def get_images_local_host_path(args):
             with open(os.path.join(subdir, file), 'r') as fp:
                 yaml_doc = yaml.safe_load(fp)
                 if yaml_doc["kind"] == package_api_kind:
-                    key_name = yaml_doc["spec"]["refName"].split('.')[0].replace('-', '_')
+                    key_name = yaml_doc["spec"]["refName"].split('.')[
+                        0].replace('-', '_')
                     if 'kapp' not in key_name:
                         key_name = key_name + '_package_localhost_path'
                         path = ":".join(
@@ -204,7 +207,8 @@ def copy_ova(args):
             yaml_docs = yaml.safe_load_all(fp)
             for yaml_doc in yaml_docs:
                 if yaml_doc["kind"] == osimage_api_kind and yaml_doc["spec"]["os"]["name"] in args.os_type:
-                    new_ova_name = "{}.ova".format(yaml_doc["spec"]["image"]["ref"]["name"])
+                    new_ova_name = "{}.ova".format(
+                        yaml_doc["spec"]["image"]["ref"]["name"])
     if not new_ova_name:
         print("New OVA name not found in metadata")
         exit(1)
@@ -213,8 +217,10 @@ def copy_ova(args):
     with open(args.kubernetes_config, 'r') as fp:
         kubernetes_args = json.loads(fp.read())
         default_ova_destination_folder = \
-            default_ova_destination_folder.format(args.os_type, kubernetes_args["kubernetes"].split('+')[0], args.ova_ts_suffix)
-        old_ova_name = "{}-{}.ova".format(args.os_type, kubernetes_args["kubernetes"].replace('+', '---'))
+            default_ova_destination_folder.format(
+                args.os_type, kubernetes_args["kubernetes"].split('+')[0], args.ova_ts_suffix)
+        old_ova_name = "{}-{}.ova".format(args.os_type,
+                                          kubernetes_args["kubernetes"].replace('+', '---'))
 
     new_path = os.path.join(args.ova_destination_folder, new_ova_name)
     old_path = os.path.join(default_ova_destination_folder, old_ova_name)
@@ -244,7 +250,8 @@ def update_tkr_metadata(args):
                 if yaml_doc["kind"] == tkr_api_kind:
                     # kubernetes version contains + which is not a supported character
                     # so replace + with ---
-                    kubernetes_version = yaml_doc["spec"]["kubernetes"]["version"].replace('+', '---')
+                    kubernetes_version = yaml_doc["spec"]["kubernetes"]["version"].replace(
+                        '+', '---')
                     tkr_file = file
                     old_tkr_name = yaml_doc["metadata"]["name"]
                 elif yaml_doc["kind"] == osimage_api_kind:
@@ -263,7 +270,8 @@ def update_tkr_metadata(args):
             # Create new OSImage name based on the OS Name, version and architecture.
             new_osimage_name = format_name(args.tkr_suffix,
                                            yaml_doc["spec"]["os"]["name"],
-                                           yaml_doc["spec"]["os"]["version"].replace('.', ''),
+                                           yaml_doc["spec"]["os"]["version"].replace(
+                                               '.', ''),
                                            yaml_doc["spec"]["os"]["arch"],
                                            kubernetes_version)
             new_osimages.append({"name": new_osimage_name})
@@ -286,7 +294,8 @@ def check_ova_file(new_osimage_name, ova_destination_folder):
     """
     for filename in os.listdir(ova_destination_folder):
         if filename == "{}.ova".format(new_osimage_name):
-            raise Exception("OVA {}.ova already exists in the OVA folder".format(new_osimage_name))
+            raise Exception(
+                "OVA {}.ova already exists in the OVA folder".format(new_osimage_name))
 
 
 def update_addon_config(addon_file, old_tkr_name, new_tkr_name):
@@ -300,7 +309,8 @@ def update_addon_config(addon_file, old_tkr_name, new_tkr_name):
             old_name = yaml_doc["metadata"]["name"]
             new_name = old_name.replace(old_tkr_name, new_tkr_name)
             yaml_doc["metadata"]["name"] = new_name
-            print("{} name changed from {} to {}".format(yaml_doc["kind"], old_name, new_name))
+            print("{} name changed from {} to {}".format(
+                yaml_doc["kind"], old_name, new_name))
             addon_data.append(yaml_doc)
 
     with open(addon_file, 'w') as os_fp:
@@ -316,7 +326,8 @@ def update_osimage(osimage_file, osimage_name):
         osimage_data = yaml.safe_load(os_fp)
     osimage_data["metadata"]["name"] = osimage_name
     osimage_data["spec"]["image"]["ref"]["name"] = osimage_name
-    print("New OSImage Name for {} is {}".format(osimage_data["spec"]["os"]["name"], osimage_name))
+    print("New OSImage Name for {} is {}".format(
+        osimage_data["spec"]["os"]["name"], osimage_name))
     with open(osimage_file, 'w') as os_fp:
         yaml.dump(osimage_data, os_fp)
 
@@ -352,7 +363,8 @@ def update_cbt(cbt_file, cbt_name, old_tkr_name, new_tkr_name):
     cbt_data["metadata"]["name"] = cbt_name
     for addon in ["cni", "cpi", "csi", "kapp"]:
         cbt_data["spec"][addon]["valuesFrom"]["providerRef"]["name"] = \
-            cbt_data["spec"][addon]["valuesFrom"]["providerRef"]["name"].replace(old_tkr_name, new_tkr_name)
+            cbt_data["spec"][addon]["valuesFrom"]["providerRef"]["name"].replace(
+                old_tkr_name, new_tkr_name)
     for index in range(len(cbt_data["spec"]["additionalPackages"])):
         if "valuesFrom" in cbt_data["spec"]["additionalPackages"][index]:
             if "secretRef" in cbt_data["spec"]["additionalPackages"][index]["valuesFrom"]:
@@ -380,6 +392,7 @@ def format_name(suffix, *default_values):
     suffix = suffix[0:max_tkr_suffix_length]
     return '-'.join([default_name, suffix])
 
+
 def render_additional_packer_variables(additional_packer_variables):
     """
     Creates a single JSON object after parses all files then
@@ -399,6 +412,7 @@ def render_additional_packer_variables(additional_packer_variables):
     print("Additional Packer Variables: ", json.dumps(output, indent=4))
     return output
 
+
 def render_folder_and_append(folder, os_type):
     """
     Creates a single JSON object after parses all files on a folder then
@@ -410,11 +424,11 @@ def render_folder_and_append(folder, os_type):
         loader=BaseLoader
     )
     os_type_tokens = os_type.split('-')
-    # First read all direct files under packer-variables. 
+    # First read all direct files under packer-variables.
     # These are the default ones applicable to all.
     # Post that add for platform specific.
     # Non-version OS specific goes in followed by versioned ones.
-    # Expectation is that if packer-variables folder has 
+    # Expectation is that if packer-variables folder has
     # say, 'ubuntu' and 'ubuntu-2204' folder with files,
     # files from 'ubuntu' get loaded first followed by 'ubuntu-2204'.
     # This means that files in version specific folder can override any
@@ -425,9 +439,10 @@ def render_folder_and_append(folder, os_type):
             with open(common_file, 'r') as fp:
                 temp = env.from_string(fp.read())
                 output.update(json.loads(temp.render(jinja_args_map)))
-    
+
     for i in reversed(range(len(os_type_tokens))):
-        platform_directory = os.path.join(folder,'-'.join(os_type_tokens[0:len(os_type_tokens) - i]))
+        platform_directory = os.path.join(
+            folder, '-'.join(os_type_tokens[0:len(os_type_tokens) - i]))
         if os.path.isdir(platform_directory):
             for platform_file in os.listdir(platform_directory):
                 with open(os.path.join(platform_directory, platform_file)) as fp:
@@ -438,11 +453,12 @@ def render_folder_and_append(folder, os_type):
 
 
 def render_default_config(args):
-    packer_vars.update(render_folder_and_append(args.default_config_folder, args.os_type))
+    packer_vars.update(render_folder_and_append(
+        args.default_config_folder, args.os_type))
     packer_vars.update(render_extra_repos(args.override_package_repositories))
-    packer_vars.update(render_additional_packer_variables(args.additional_packer_variables))
+    packer_vars.update(render_additional_packer_variables(
+        args.additional_packer_variables))
 
-    
 
 def render_extra_repos(comma_sep_repo_list):
     output = {}
@@ -458,8 +474,10 @@ def render_extra_repos(comma_sep_repo_list):
     print("Additional inflight package repos: ", json.dumps(output, indent=4))
     return output
 
+
 def check_photon_stig_compliance():
-    current_kubernetes_version = jinja_args_map["kubernetes_series"].replace('v', "")
+    current_kubernetes_version = jinja_args_map["kubernetes_series"].replace(
+        'v', "")
     if semver.compare(current_kubernetes_version, "1.25.0") >= 0:
         jinja_args_map["photon_stig_compliance"] = "true"
 
