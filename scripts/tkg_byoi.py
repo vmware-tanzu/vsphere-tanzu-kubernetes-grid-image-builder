@@ -172,8 +172,13 @@ def get_images_local_host_path(args):
                         0].replace('-', '_')
                     if 'kapp' not in key_name:
                         key_name = key_name + '_package_localhost_path'
-                        path = ":".join(
-                            yaml_doc["spec"]["template"]["spec"]["fetch"][0]["imgpkgBundle"]["image"].split('@')[0:-1])
+
+                        image = yaml_doc["spec"]["template"]["spec"]["fetch"][0]["imgpkgBundle"]["image"]
+                        # Split based on the presence of '@' or ':'.
+                        if '@' in image:
+                            path = ":".join(image.split('@')[:-1])
+                        else:
+                            path = ":".join(image.split(':')[:-1])
                         localhost_paths[key_name] = path
                         continue
                     kapp_file = os.path.join(subdir, file)
