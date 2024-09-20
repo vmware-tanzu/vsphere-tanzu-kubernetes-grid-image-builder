@@ -9,8 +9,13 @@ MAKEFLAGS += -s
 # Default variables
 DEFAULT_ARTIFACTS_CONTAINER_PORT = 8081
 DEFAULT_PACKER_HTTP_PORT = 8082
+DEFAULT_IMAGE_BUILDER_BASE_IMAGE = library/photon:5.0
 MAKE_HELPERS_PATH = $(shell pwd)/hack/make-helpers
-SUPPORTED_VERSIONS_JSON = $(shell pwd)/supported-versions.json
+DEFAULT_SUPPORTED_VERSIONS_JSON = $(shell pwd)/supported-versions.json
+
+ifndef SUPPORTED_VERSIONS_JSON
+override SUPPORTED_VERSIONS_JSON = $(DEFAULT_SUPPORTED_VERSIONS_JSON)
+endif
 
 # Terminal colors
 clear=\033[0m

@@ -37,6 +37,9 @@ function download_configuration_files() {
 # Generate packaer input variables based on packer-variables folder
 function generate_packager_configuration() {
     mkdir -p $ova_destination_folder
+    TKR_SUFFIX_ARG=
+    [[ -n "$TKR_SUFFIX" ]] && TKR_SUFFIX_ARG="--tkr_suffix ${TKR_SUFFIX}"
+
     python3 image/scripts/tkg_byoi.py setup \
     --host_ip ${HOST_IP} \
     --artifacts_container_port ${ARTIFACTS_CONTAINER_PORT} \
@@ -44,7 +47,7 @@ function generate_packager_configuration() {
     --default_config_folder ${default_packer_variables} \
     --dest_config ${packer_configuration_folder} \
     --tkr_metadata_folder ${tkr_metadata_folder} \
-    --tkr_suffix ${TKR_SUFFIX} \
+    ${TKR_SUFFIX_ARG} \
     --kubernetes_config ${image_builder_root}/kubernetes_config.json \
     --ova_destination_folder ${ova_destination_folder} \
     --os_type ${OS_TARGET} \
@@ -102,7 +105,8 @@ function packer_logging() {
     mkdir /image-builder/packer_cache
     mkdir -p $artifacts_output_folder/logs
     export PACKER_LOG=10
-    export PACKER_LOG_PATH="${artifacts_output_folder}/logs/packer-$RANDOM.log"
+    datetime=$(date '+%Y%m%d%H%M%S')
+    export PACKER_LOG_PATH="${artifacts_output_folder}/logs/packer-$datetime-$RANDOM.log"
     echo "Generating packer logs to $PACKER_LOG_PATH"
 }
 
@@ -119,10 +123,13 @@ function trigger_image_builder() {
 # Packer generates OVA with a different name so change the OVA name to OSImage/VMI and
 # copy to the destination folder.
 function copy_ova() {
+    TKR_SUFFIX_ARG=
+    [[ -n "$TKR_SUFFIX" ]] && TKR_SUFFIX_ARG="--tkr_suffix ${TKR_SUFFIX}"
     python3 image/scripts/tkg_byoi.py copy_ova \
     --kubernetes_config ${image_builder_root}/kubernetes_config.json \
     --tkr_metadata_folder ${tkr_metadata_folder} \
-    --tkr_suffix ${TKR_SUFFIX} --os_type ${OS_TARGET} \
+    ${TKR_SUFFIX_ARG} \
+    --os_type ${OS_TARGET} \
     --ova_destination_folder ${ova_destination_folder} \
     --ova_ts_suffix ${ova_ts_suffix}
 }

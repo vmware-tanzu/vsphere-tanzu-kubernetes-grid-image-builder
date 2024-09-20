@@ -20,10 +20,10 @@ osimage_api_kind = "OSImage"
 cbt_api_kind = "ClusterBootstrapTemplate"
 package_api_kind = "Package"
 
-osimage_name_format = "{}-{}-{}-{}-{}"
-tkr_name_format = "{}-{}"
 max_k8s_object_name_length = 63
 max_tkr_suffix_length = 8
+
+variable_files = ['default-args', 'goss-args', 'packer-http-config', 'vsphere']
 
 
 def parse_args():
@@ -45,7 +45,7 @@ def parse_args():
                              help='Path to default packer variable configuration folder')
     setup_group.add_argument('--tkr_metadata_folder', required=True,
                              help='Path to TKR metadata')
-    setup_group.add_argument('--tkr_suffix', required=True,
+    setup_group.add_argument('--tkr_suffix', required=False,
                              help='Suffix to be added to the TKR, OVA and OSImage')
     setup_group.add_argument('--dest_config', required=True,
                              help='Path to the final packer destination config file')
@@ -61,7 +61,7 @@ def parse_args():
                                 help='OS type')
     ova_copy_group.add_argument('--tkr_metadata_folder', required=True,
                                 help='Path to TKR metadata')
-    ova_copy_group.add_argument('--tkr_suffix', required=True,
+    ova_copy_group.add_argument('--tkr_suffix', required=False,
                                 help='Suffix to be added to the TKR, OVA and OSImage')
     ova_copy_group.add_argument('--ova_destination_folder', required=True,
                                 help='Destination folder to copy the OVA after changing the name')
@@ -122,6 +122,14 @@ def populate_jinja_args(args):
     # Populate the ova_ts_suffix
     jinja_args_map["ova_ts_suffix"] = args.ova_ts_suffix
 
+    # capabilities-package is not present for TKrs starting v1.31.x. capabilities_package_present can be
+    # used to determine if carvel package of capabilites should be present depending on the TKr version.
+    jinja_args_map["capabilities_package_present"] = True
+    k8sversion = semver.Version.parse(kubernetes_series)
+    # When comparing ignore rc/alpha/beta notations
+    if semver.Version(k8sversion.major,k8sversion.minor,k8sversion.patch).compare("1.31.0") >= 0:
+        jinja_args_map["capabilities_package_present"] = False
+
     # Set STIG compliant value
     jinja_args_map["photon_stig_compliance"] = "false"
     if args.os_type in ("photon-3", "photon-5"):
@@ -129,6 +137,9 @@ def populate_jinja_args(args):
 
     images_local_host_paths = get_images_local_host_path(args)
     jinja_args_map.update(images_local_host_paths)
+
+    jinja_args_map['registry_store_path'] = get_registry_store_path(args)
+
     print("Jinja Args:", jinja_args_map)
 
 
@@ -151,18 +162,30 @@ def get_images_local_host_path(args):
                     if 'kapp' not in key_name:
                         key_name = key_name + '_package_localhost_path'
                         path = ":".join(
-                            yaml_doc["spec"]["template"]["spec"]["fetch"][0]["imgpkgBundle"]["image"].split(':')[0:-1])
+                            yaml_doc["spec"]["template"]["spec"]["fetch"][0]["imgpkgBundle"]["image"].split('@')[0:-1])
                         localhost_paths[key_name] = path
                         continue
                     kapp_file = os.path.join(subdir, file)
                     kapp_key_name = key_name + '_localhost_path'
     with open(kapp_file, 'r') as fp:
         for line in fp:
-            if "- image:" in line:
+            if "image: localhost:5000/tkg/packages/kapp-controller" in line:
                 path = ':'.join(line.strip().split('@')[0].split(':')[1:]).strip()
                 localhost_paths[kapp_key_name] = path
                 print(line)
+    print("localhost_paths: ", localhost_paths)
     return localhost_paths
+
+
+def get_registry_store_path(args):
+    os_type_parts = args.os_type.split('-')
+    os_name = 'linux'
+    arch_variants = ['amd64']
+    if len(os_type_parts) > 0 and os_type_parts[0].lower() == 'windows':
+        os_name = 'windows'
+        arch_variants.append(os_type_parts[1])
+
+    return 'registry-%s-%s.tar.gz' % (os_name, '-'.join(arch_variants))
 
 
 def copy_ova(args):
@@ -179,6 +202,9 @@ def copy_ova(args):
             for yaml_doc in yaml_docs:
                 if yaml_doc["kind"] == osimage_api_kind and yaml_doc["spec"]["os"]["name"] in args.os_type:
                     new_ova_name = "{}.ova".format(yaml_doc["spec"]["image"]["ref"]["name"])
+    if not new_ova_name:
+        print("New OVA name not found in metadata")
+        exit(1)
 
     old_ova_name = ''
     with open(args.kubernetes_config, 'r') as fp:
@@ -232,7 +258,8 @@ def update_tkr_metadata(args):
         with open(osimage_file, 'r') as fp:
             yaml_doc = yaml.safe_load(fp)
             # Create new OSImage name based on the OS Name, version and architecture.
-            new_osimage_name = format_name(osimage_name_format, args.tkr_suffix, yaml_doc["spec"]["os"]["name"],
+            new_osimage_name = format_name(args.tkr_suffix,
+                                           yaml_doc["spec"]["os"]["name"],
                                            yaml_doc["spec"]["os"]["version"].replace('.', ''),
                                            yaml_doc["spec"]["os"]["arch"],
                                            kubernetes_version)
@@ -241,7 +268,7 @@ def update_tkr_metadata(args):
                 check_ova_file(new_osimage_name, args.ova_destination_folder)
         update_osimage(osimage_file, new_osimage_name)
 
-    new_tkr_name = format_name(tkr_name_format, args.tkr_suffix, kubernetes_version)
+    new_tkr_name = format_name(args.tkr_suffix, kubernetes_version)
     update_tkr(tkr_file, new_tkr_name, new_osimages)
     update_cbt(cbt_file, new_tkr_name, old_tkr_name, new_tkr_name)
 
@@ -334,53 +361,61 @@ def update_cbt(cbt_file, cbt_name, old_tkr_name, new_tkr_name):
     print("New CBT Name:", cbt_name)
 
 
-def format_name(template, suffix, *default_values):
+def format_name(suffix, *default_values):
     """
     Creates a kubernetes object name with max name length(63) after
     appending the suffix string.
     """
+    default_name = '-'.join(default_values)
+    if not suffix:
+        return default_name
+
     max_k8s_object_name_length = 63
-    max_tkr_suffix_length = 8
-    suffix = suffix[0:max_tkr_suffix_length]
-    default_template_length = len(template.replace('{}', ''))
-    total_length = default_template_length
-    for string in default_values:
-        total_length = total_length + len(string)
-    max_tkr_suffix_length = max_k8s_object_name_length - total_length
+    max_tkr_suffix_length = max_k8s_object_name_length - len(default_name) - 1
     if max_tkr_suffix_length > len(suffix):
         max_tkr_suffix_length = len(suffix)
     suffix = suffix[0:max_tkr_suffix_length]
-    return template.format(*default_values, suffix)
+    return '-'.join([default_name, suffix])
 
 
-def render_folder_and_append(folder):
+def render_folder_and_append(folder, os_type):
     """
     Creates a single JSON object after parses all files on a folder then
     applies the Jinja2 templating using jinja_args_map dictionary.
     """
     output = {}
-    print("Listing files to render and append:")
-    for filename in os.listdir(folder):
-        if "versionManifest" in filename:
-            continue
-        file = os.path.join(folder, filename)
+    os_type_tokens = os_type.split('-')
+    for variable_file in variable_files:
+        platform_file = None
+        for i in range(len(os_type_tokens)+1):
+            platform_tokens = [variable_file]
+            platform_tokens.extend(os_type_tokens[0:len(os_type_tokens) - i])
+            platform_specific_name = '%s.j2' % ('-'.join(platform_tokens))
+            print(platform_specific_name)
+            if os.path.exists(os.path.join(folder, platform_specific_name)):
+                platform_file = os.path.join(folder, platform_specific_name)
+                break
+        if not platform_file:
+            raise Exception("required arg file " + variable_file + " not found")
         env = Environment(
             extensions=['jinja2_time.TimeExtension'],
             loader=BaseLoader
         )
-        with open(file, 'r') as fp:
+        with open(platform_file, 'r') as fp:
             temp = env.from_string(fp.read())
             output.update(json.loads(temp.render(jinja_args_map)))
     return output
 
 
 def render_default_config(args):
-    packer_vars.update(render_folder_and_append(args.default_config_folder))
+    packer_vars.update(render_folder_and_append(args.default_config_folder, args.os_type))
+
 
 def check_photon_stig_compliance():
     current_kubernetes_version = jinja_args_map["kubernetes_series"].replace('v', "")
     if semver.compare(current_kubernetes_version, "1.25.0") >= 0:
         jinja_args_map["photon_stig_compliance"] = "true"
+
 
 if __name__ == "__main__":
     main()

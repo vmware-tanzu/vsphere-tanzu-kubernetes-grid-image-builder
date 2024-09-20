@@ -100,6 +100,21 @@ command:
     {{$key}}: {{$val}}
   {{end}}
 {{end}}
+{{end}}
+
+{{ if eq .Vars.OS "windows"}} # Windows
+# Workaround until windows features are added to goss
+command:
+{{range $name, $vers := index .Vars .Vars.OS "common-windows-features"}}
+  "Windows Feature - {{ $name }}":
+    exec: powershell -command "(Get-WindowsFeature {{ $name }} | select *)"
+    exit-status: 0
+    stdout: {{range $vers.expected}}
+    - {{.}}
+    timeout: 60000
+    {{end}}
+{{end}}
+{{end}}
 
 # Iterate thru different OS Versions like RHEL7/8, Photon 3/4(future) etc.
 {{$distro_version := .Vars.OS_VERSION}}

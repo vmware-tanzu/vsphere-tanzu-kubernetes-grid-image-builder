@@ -35,6 +35,8 @@ rh8_rpms: &rh8_rpms
 
 rh9_rpms: &rh9_rpms
   nftables:
+  python3-netifaces:
+  python3-requests:
 
 common_debs: &common_debs
   auditd:
@@ -209,8 +211,8 @@ flatcar:
 photon:
   common-service:
     apparmor:
-      enabled: true
-      running: true
+      enabled: false
+      running: false
   common-kernel-param:
     net.ipv4.tcp_limit_output_bytes:
       value: "524288"
@@ -219,9 +221,9 @@ photon:
     audit:
   ova:
     command:
-      grep apparmor=1 /boot/photon.cfg:
+      grep apparmor=0 /boot/photon.cfg:
         exit-status: 0
-        stdout: ["apparmor=1"]
+        stdout: ["apparmor=0"]
         stderr: []
         timeout: 0
     service:
@@ -234,15 +236,15 @@ photon:
       cloud-utils:
       python3-netifaces:
     os_version:
-      - distro_version: "3.0"
-        package:
-          <<: *photon_3_rpms
-      - distro_version: "4.0"
-        package:
-          <<: *photon_4_rpms
-      - distro_version: "5.0"
-        package:
-          <<: *photon_5_rpms
+    - distro_version: "3"
+      package:
+        <<: *photon_3_rpms
+    - distro_version: "4"
+      package:
+        <<: *photon_4_rpms
+    - distro_version: "5"
+      package:
+        <<: *photon_5_rpms
 mariner:
   common-package: *common_mariner_rpms
   azure:
@@ -258,8 +260,8 @@ rockylinux:
     command:
       pip3 list --format=columns | grep 'awscli' | awk -F' ' '{print $1}':
         exit-status: 0
-        stdout: ["awscli"]
-        stderr: []
+        stdout: [ "awscli" ]
+        stderr: [ ]
         timeout: 0
     service:
       amazon-ssm-agent:
@@ -269,17 +271,17 @@ rockylinux:
     package:
       open-vm-tools:
     os_version:
-      - distro_version: "7"
-        package:
-          python2-pip:
-          <<: *rh7_rpms
-      - distro_version: "8"
-        package:
-          python2-pip:
-          <<: *rh8_rpms
-      - distro_version: "9"
-        package:
-          <<: *rh9_rpms
+    - distro_version: "7"
+      package:
+        python2-pip:
+        <<: *rh7_rpms
+    - distro_version: "8"
+      package:
+        python2-pip:
+        <<: *rh8_rpms
+    - distro_version: "9"
+      package:
+        <<: *rh9_rpms
   qemu:
     package:
       open-vm-tools:
@@ -324,8 +326,8 @@ rhel:
     command:
       pip3 list --format=columns | grep 'awscli' | awk -F' ' '{print $1}':
         exit-status: 0
-        stdout: ["awscli"]
-        stderr: []
+        stdout: [ "awscli" ]
+        stderr: [ ]
         timeout: 0
     service:
       amazon-ssm-agent:
@@ -355,12 +357,12 @@ rhel:
       python2-pip:
       open-vm-tools:
     os_version:
-      - distro_version: "7"
-        package:
-          <<: *rh7_rpms
-      - distro_version: "8"
-        package:
-          <<: *rh8_rpms
+    - distro_version: "7"
+      package:
+        <<: *rh7_rpms
+    - distro_version: "8"
+      package:
+        <<: *rh8_rpms
   qemu:
     package:
       open-vm-tools:
@@ -532,10 +534,10 @@ windows:
   common-windows-features:
     Hyper-V-PowerShell:
       expected:
-        - Installed
+      - Installed
     Containers:
       expected:
-        - Installed
+      - Installed
 
   common-files:
     c:/etc/kubernetes/pki:
@@ -558,60 +560,60 @@ windows:
   common-windows-service:
     cloudbase-init:
       expected:
-        - Manual
-        - Stopped
+      - Manual
+      - Stopped
     kubelet:
-      expected:
-        - Automatic
-        - "/RequiredServices.+:.+(containerd|docker)/"
+      expected: 
+      - Automatic 
+      - "/RequiredServices.+:.+(containerd|docker)/"
     sshd:
       expected:
-        - Automatic
-        - Running
+      - Automatic
+      - Running
 
   azure:
     windows-service:
 
-    files:
+    files: 
       'c:/program files/Cloudbase Solutions/Cloudbase-init/conf/cloudbase-init.conf': 
         exists: true
         filetype: file
         contains:
-          - "COM2,115200,N,8"
-          - "metadata_services=cloudbaseinit.metadata.services.azureservice.AzureService"
-          - "cloudbaseinit.plugins.common.userdata.UserDataPlugin"
-          - "cloudbaseinit.plugins.windows.createuser.CreateUserPlugin"
-          - "cloudbaseinit.plugins.common.ephemeraldisk.EphemeralDiskPlugin"
-          - "cloudbaseinit.plugins.windows.azureguestagent.AzureGuestAgentPlugin"
-          - "cloudbaseinit.plugins.common.mtu.MTUPlugin"
-          - "cloudbaseinit.plugins.common.sethostname.SetHostNamePlugin"
+        - "COM2,115200,N,8"
+        - "metadata_services=cloudbaseinit.metadata.services.azureservice.AzureService"
+        - "cloudbaseinit.plugins.common.userdata.UserDataPlugin"
+        - "cloudbaseinit.plugins.windows.createuser.CreateUserPlugin"
+        - "cloudbaseinit.plugins.common.ephemeraldisk.EphemeralDiskPlugin"
+        - "cloudbaseinit.plugins.windows.azureguestagent.AzureGuestAgentPlugin"
+        - "cloudbaseinit.plugins.common.mtu.MTUPlugin"
+        - "cloudbaseinit.plugins.common.sethostname.SetHostNamePlugin"
   ova:
     windows-service:
       vmtools:
-        expected:
-          - Automatic
-          - Running
+        expected: 
+        - Automatic 
+        - Running
     files:
       'c:/program files/Cloudbase Solutions/Cloudbase-init/conf/cloudbase-init.conf': 
         exists: true
         filetype: file
         contains:
-          - "!/logging_serial_port=COM1,115200,N,8/"
-          - "cloudbaseinit.metadata.services.vmwareguestinfoservice.VMwareGuestInfoService"
-          - "cloudbaseinit.plugins.common.ephemeraldisk.EphemeralDiskPlugin"
-          - "cloudbaseinit.plugins.common.mtu.MTUPlugin"
-          - "cloudbaseinit.plugins.common.sethostname.SetHostNamePlugin"
-          - "cloudbaseinit.plugins.common.networkconfig.NetworkConfigPlugin"
-          - "cloudbaseinit.plugins.common.sshpublickeys.SetUserSSHPublicKeysPlugin"
-          - "cloudbaseinit.plugins.common.userdata.UserDataPlugin"
-          - "cloudbaseinit.plugins.common.localscripts.LocalScriptsPlugin"
-          - "cloudbaseinit.plugins.windows.createuser.CreateUserPlugin"
-          - "cloudbaseinit.plugins.windows.extendvolumes.ExtendVolumesPlugin"
+        - "!/logging_serial_port=COM1,115200,N,8/"
+        - "cloudbaseinit.metadata.services.vmwareguestinfoservice.VMwareGuestInfoService"
+        - "cloudbaseinit.plugins.common.ephemeraldisk.EphemeralDiskPlugin"
+        - "cloudbaseinit.plugins.common.mtu.MTUPlugin"
+        - "cloudbaseinit.plugins.common.sethostname.SetHostNamePlugin"
+        - "cloudbaseinit.plugins.common.networkconfig.NetworkConfigPlugin"
+        - "cloudbaseinit.plugins.common.sshpublickeys.SetUserSSHPublicKeysPlugin"
+        - "cloudbaseinit.plugins.common.userdata.UserDataPlugin"
+        - "cloudbaseinit.plugins.common.localscripts.LocalScriptsPlugin"
+        - "cloudbaseinit.plugins.windows.createuser.CreateUserPlugin"
+        - "cloudbaseinit.plugins.windows.extendvolumes.ExtendVolumesPlugin"
       'c:/program files/Cloudbase Solutions/Cloudbase-init/conf/cloudbase-init-unattend.conf': 
         exists: true
         filetype: file
         contains:
-          - "metadata_services=cloudbaseinit.metadata.services.vmwareguestinfoservice.VMwareGuestInfoService"
+        - "metadata_services=cloudbaseinit.metadata.services.vmwareguestinfoservice.VMwareGuestInfoService"
   amazon:
     windows-service:
 
@@ -620,12 +622,12 @@ windows:
         exists: true
         filetype: file
         contains:
-          - "!/logging_serial_port=COM1,115200,N,8/"
-          - "metadata_services=cloudbaseinit.metadata.services.ec2service.EC2Service"
-          - "cloudbaseinit.plugins.common.ephemeraldisk.EphemeralDiskPlugin"
-          - "cloudbaseinit.plugins.common.mtu.MTUPlugin"
-          - "cloudbaseinit.plugins.common.sethostname.SetHostNamePlugin"
-          - "cloudbaseinit.plugins.common.sshpublickeys.SetUserSSHPublicKeysPlugin"
+        - "!/logging_serial_port=COM1,115200,N,8/"
+        - "metadata_services=cloudbaseinit.metadata.services.ec2service.EC2Service"
+        - "cloudbaseinit.plugins.common.ephemeraldisk.EphemeralDiskPlugin"
+        - "cloudbaseinit.plugins.common.mtu.MTUPlugin"
+        - "cloudbaseinit.plugins.common.sethostname.SetHostNamePlugin"
+        - "cloudbaseinit.plugins.common.sshpublickeys.SetUserSSHPublicKeysPlugin"
 
   nutanix:
     windows-service:
@@ -635,21 +637,21 @@ windows:
         exists: true
         filetype: file
         contains:
-          - "!/logging_serial_port=COM1,115200,N,8/"
-          - "cloudbaseinit.metadata.services.configdrive.ConfigDriveService"
-          - "cloudbaseinit.plugins.common.ephemeraldisk.EphemeralDiskPlugin"
-          - "cloudbaseinit.plugins.common.mtu.MTUPlugin"
-          - "cloudbaseinit.plugins.common.sethostname.SetHostNamePlugin"
-          - "cloudbaseinit.plugins.common.sshpublickeys.SetUserSSHPublicKeysPlugin"
-          - "cloudbaseinit.plugins.common.userdata.UserDataPlugin"
-          - "cloudbaseinit.plugins.common.localscripts.LocalScriptsPlugin"
-          - "cloudbaseinit.plugins.windows.createuser.CreateUserPlugin"
-          - "cloudbaseinit.plugins.windows.extendvolumes.ExtendVolumesPlugin"
+        - "!/logging_serial_port=COM1,115200,N,8/"
+        - "cloudbaseinit.metadata.services.configdrive.ConfigDriveService"
+        - "cloudbaseinit.plugins.common.ephemeraldisk.EphemeralDiskPlugin"
+        - "cloudbaseinit.plugins.common.mtu.MTUPlugin"
+        - "cloudbaseinit.plugins.common.sethostname.SetHostNamePlugin"
+        - "cloudbaseinit.plugins.common.sshpublickeys.SetUserSSHPublicKeysPlugin"
+        - "cloudbaseinit.plugins.common.userdata.UserDataPlugin"
+        - "cloudbaseinit.plugins.common.localscripts.LocalScriptsPlugin"
+        - "cloudbaseinit.plugins.windows.createuser.CreateUserPlugin"
+        - "cloudbaseinit.plugins.windows.extendvolumes.ExtendVolumesPlugin"
       'c:/program files/Cloudbase Solutions/Cloudbase-init/conf/cloudbase-init-unattend.conf': 
         exists: true
         filetype: file
         contains:
-          - "metadata_services=cloudbaseinit.metadata.services.base.EmptyMetadataService"
+        - "metadata_services=cloudbaseinit.metadata.services.base.EmptyMetadataService"
 
 # This section contains everything unique to TKG
 tkg:

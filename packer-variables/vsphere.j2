@@ -21,6 +21,12 @@
     "linked_clone": "true",
     {# To create a snapshot of the Packer VM after customization #}
     "create_snapshot": "true",
+    {% if os_type.startswith("windows-") %}
+    {# [Optional] Windows only: Windows OS Image #}
+    "os_iso_path": "[sharedVmfs-0] windows.iso",
+    {# [Optional] Windows only: VMware Tools Image #}
+    "vmtools_iso_path": "[sharedVmfs-0] vmtools.iso",
+    {% endif %}
     {# To destroy Packer VM after Image Build is completed #}
     "destroy": "true"
 }

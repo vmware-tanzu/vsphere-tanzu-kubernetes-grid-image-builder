@@ -12,7 +12,19 @@
 - import_tasks: ubuntu_hack.yml
   when: ansible_os_family == "Debian"
 
+- name: Check if local registry store exists
+  uri:
+    url: "{{ registry_store_archive_url | trim }}"
+    method: GET
+    status_code: [200, 201, 302]
+  register: registry_store_url_check
+  ignore_errors: true
+
+- import_tasks: registry.yml
+  when: registry_store_url_check.status == 200
+
 - import_tasks: retag_images.yml
+  when: registry_store_url_check.status != 200
 
 - import_tasks: iptables.yml
 

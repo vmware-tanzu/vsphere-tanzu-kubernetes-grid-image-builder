@@ -1,0 +1,26 @@
+# Copyright 2024 VMware, Inc.
+# SPDX-License-Identifier: MPL-2.0
+
+- name: Ensure containerd conf.d
+  ansible.windows.win_file:
+    path: "{{ item }}"
+    state: directory
+  with_items:
+    - "{{ programfiles.stdout | trim }}\\containerd\\conf.d"
+
+- name: Copy containerd config file {{ containerd_config_file }}
+  ansible.windows.win_template:
+    dest: "{{ programfiles.stdout | trim }}\\containerd\\config.toml"
+    src: "containerd/config.toml"
+  vars:
+    allusersprofile: "{{ alluserprofile.stdout | trim }}"
+    plugin_bin_dir: "{{ systemdrive.stdout | trim }}/opt/cni/bin"
+    plugin_conf_dir: "{{ systemdrive.stdout | trim }}/etc/cni/net.d"
+    # programfiles is C:\Program Files, but should be C:\\Program Files
+    # otherwise task Register Containerd fails with "invalid escape sequence: \P"
+    containerd_conf_dir: '{{ programfiles.stdout | trim | regex_replace("\\", "\\\\") }}\\\\containerd'
+
+- name: Remove crictl.exe
+  ansible.windows.win_file:
+    path: "{{ programfiles.stdout | trim }}\\containerd\\crictl.exe"
+    state: absent
