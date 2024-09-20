@@ -53,6 +53,9 @@ def parse_args():
                              help='Destination folder to copy the OVA after changing the name')
     setup_group.add_argument('--ova_ts_suffix', required=True,
                              help='Suffix to be attached to generate the OVA name')
+    setup_group.add_argument('--additional_packer_variables', required=False,
+                             default=None,
+                             help='Comma separated additional Image Builder overrides as json files')
 
     ova_copy_group = sub_parsers.add_parser("copy_ova")
     ova_copy_group.add_argument('--kubernetes_config', required=True,
@@ -377,6 +380,24 @@ def format_name(suffix, *default_values):
     suffix = suffix[0:max_tkr_suffix_length]
     return '-'.join([default_name, suffix])
 
+def render_additional_packer_variables(additional_packer_variables):
+    """
+    Creates a single JSON object after parses all files then
+    applies the Jinja2 templating using jinja_args_map dictionary.
+    """
+    output = {}
+    env = Environment(
+        extensions=['jinja2_time.TimeExtension'],
+        loader=BaseLoader
+    )
+    if additional_packer_variables is not None:
+        additional_packer_var_files = additional_packer_variables.split(",")
+        for variable_file in additional_packer_var_files:
+            if os.path.exists(variable_file):
+                with open(variable_file, 'r') as fp:
+                    output.update(json.load(fp))
+    print("Additional Packer Variables: ", json.dumps(output, indent=4))
+    return output
 
 def render_folder_and_append(folder, os_type):
     """
@@ -384,6 +405,10 @@ def render_folder_and_append(folder, os_type):
     applies the Jinja2 templating using jinja_args_map dictionary.
     """
     output = {}
+    env = Environment(
+        extensions=['jinja2_time.TimeExtension'],
+        loader=BaseLoader
+    )
     os_type_tokens = os_type.split('-')
     for variable_file in variable_files:
         platform_file = None
@@ -397,10 +422,6 @@ def render_folder_and_append(folder, os_type):
                 break
         if not platform_file:
             raise Exception("required arg file " + variable_file + " not found")
-        env = Environment(
-            extensions=['jinja2_time.TimeExtension'],
-            loader=BaseLoader
-        )
         with open(platform_file, 'r') as fp:
             temp = env.from_string(fp.read())
             output.update(json.loads(temp.render(jinja_args_map)))
@@ -409,6 +430,7 @@ def render_folder_and_append(folder, os_type):
 
 def render_default_config(args):
     packer_vars.update(render_folder_and_append(args.default_config_folder, args.os_type))
+    packer_vars.update(render_additional_packer_variables(args.additional_packer_variables))
 
 
 def check_photon_stig_compliance():

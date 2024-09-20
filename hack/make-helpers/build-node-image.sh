@@ -35,6 +35,23 @@ function build_node_image() {
   AUTO_UNATTEND_ANSWER_FILE_BIND=
   [ -n "$AUTO_UNATTEND_ANSWER_FILE_PATH" ] && AUTO_UNATTEND_ANSWER_FILE_BIND="-v ${AUTO_UNATTEND_ANSWER_FILE_PATH}:/image-builder/images/capi/packer/ova/windows/${OS_TARGET}/autounattend.xml"
 
+  # additional_jinja_args
+  ADDITIONAL_PACKER_VAR_FILES_MOUNTS=
+  INCONTAINER_ADDITIONAL_PACKER_VAR_ENV=
+  if [ -n "$ADDITIONAL_PACKER_VARIABLE_FILES" ]; then
+    for i in ${ADDITIONAL_PACKER_VARIABLE_FILES//,/ }
+    do
+        FILENAME=$(basename -- "${i}")
+        INCONTAINER_PATH="/image-builder/images/capi/image/customizations/${FILENAME}"
+        ADDITIONAL_PACKER_VAR_FILES_MOUNTS="${ADDITIONAL_PACKER_VAR_FILES_MOUNTS} -v ${i}:${INCONTAINER_PATH}"
+        if [[ "${#INCONTAINER_ADDITIONAL_PACKER_VAR_ENV}" == 0 ]];then
+            INCONTAINER_ADDITIONAL_PACKER_VAR_ENV="-e ADDITIONAL_PACKER_VARIABLE_FILES=${INCONTAINER_PATH}"
+        else
+            INCONTAINER_ADDITIONAL_PACKER_VAR_ENV="${INCONTAINER_ADDITIONAL_PACKER_VAR_ENV},${INCONTAINER_PATH}"
+        fi
+    done
+  fi
+  
   docker run -d \
     --name $(get_node_image_builder_container_name "$KUBERNETES_VERSION" "$OS_TARGET") \
     $(get_node_image_builder_container_labels "$KUBERNETES_VERSION" "$OS_TARGET") \
@@ -45,7 +62,8 @@ function build_node_image() {
     -v $ROOT/packer-variables:/image-builder/images/capi/image/packer-variables \
     -v $ROOT/scripts:/image-builder/images/capi/image/scripts \
     -v $IMAGE_ARTIFACTS_PATH:/image-builder/images/capi/artifacts \
-    ${AUTO_UNATTEND_ANSWER_FILE_BIND} \
+    ${ADDITIONAL_PACKER_VAR_FILES_MOUNTS} \
+    ${INCONTAINER_ADDITIONAL_PACKER_VAR_ENV} \
     -w /image-builder/images/capi/ \
     -e HOST_IP=$HOST_IP -e ARTIFACTS_CONTAINER_PORT=$ARTIFACTS_CONTAINER_PORT -e OS_TARGET=$OS_TARGET \
     -e TKR_SUFFIX=$TKR_SUFFIX -e KUBERNETES_VERSION=$KUBERNETES_VERSION \

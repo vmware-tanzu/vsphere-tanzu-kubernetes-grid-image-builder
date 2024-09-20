@@ -40,6 +40,10 @@ function generate_packager_configuration() {
     TKR_SUFFIX_ARG=
     [[ -n "$TKR_SUFFIX" ]] && TKR_SUFFIX_ARG="--tkr_suffix ${TKR_SUFFIX}"
 
+    # additional_packer_variables
+    ADDITIONAL_PACKER_VAR_FILES_LIST=
+    [[ -n "$ADDITIONAL_PACKER_VARIABLE_FILES" ]] && ADDITIONAL_PACKER_VAR_FILES_LIST="--additional_packer_variables ${ADDITIONAL_PACKER_VARIABLE_FILES}"
+
     python3 image/scripts/tkg_byoi.py setup \
     --host_ip ${HOST_IP} \
     --artifacts_container_port ${ARTIFACTS_CONTAINER_PORT} \
@@ -51,7 +55,8 @@ function generate_packager_configuration() {
     --kubernetes_config ${image_builder_root}/kubernetes_config.json \
     --ova_destination_folder ${ova_destination_folder} \
     --os_type ${OS_TARGET} \
-    --ova_ts_suffix ${ova_ts_suffix}
+    --ova_ts_suffix ${ova_ts_suffix} \
+    ${ADDITIONAL_PACKER_VAR_FILES_LIST}
 
     echo "Image Builder Packer Variables"
     cat ${packer_configuration_folder}/packer-variables.json
