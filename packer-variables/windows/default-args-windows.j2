@@ -7,6 +7,7 @@
   "additional_prepull_images": "",
   "build_version": "{{ os_type }}-kube-{{ kubernetes_series }}-{{ ova_ts_suffix }}",
   "cloudbase_init_url": "http://{{ host_ip }}:{{ artifacts_container_port }}/artifacts/{{ kubernetes_version }}/bin/windows/amd64/CloudbaseInitSetup_x64.msi",
+  "cloudbase_real_time_clock_utc": "true",
   "containerd_url": "http://{{ host_ip }}:{{ artifacts_container_port }}/artifacts/{{ kubernetes_version }}/bin/windows/amd64/cri-containerd.tar",
   "containerd_sha256_windows": "{{ containerd_sha256_windows_amd64 }}",
   "containerd_version": "{{ containerd }}",
