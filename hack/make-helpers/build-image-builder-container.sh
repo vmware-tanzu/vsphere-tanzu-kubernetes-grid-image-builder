@@ -31,7 +31,5 @@ if [ ! -z ${DEBUGGING+x} ]; then
 fi 
 
 docker build --platform=linux/amd64 $docker_debug_flags \
---build-arg BASE_IMAGE="$IMAGE_BUILDER_BASE_IMAGE" \
---build-arg PACKER_GITHUB_API_TOKEN="$PACKER_GITHUB_API_TOKEN" \
 -t $(get_image_builder_container_image_name $KUBERNETES_VERSION) \
 $build_variables $(dirname "${BASH_SOURCE[0]}")/../../.
