@@ -735,7 +735,7 @@ tkg:
         running: true
       sshd-keygen.service:
         enabled: true
-        running: false
+        running: true
     kernel-param:
     ova:
       os_version:

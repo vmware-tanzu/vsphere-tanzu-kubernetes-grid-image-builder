@@ -140,10 +140,6 @@ def populate_jinja_args(args):
     if semver.Version(k8sversion.major, k8sversion.minor, k8sversion.patch).compare("1.31.0") >= 0:
         jinja_args_map["capabilities_package_present"] = False
 
-    # Set STIG compliant value
-    jinja_args_map["photon_stig_compliance"] = "false"
-    if args.os_type in ("photon-3", "photon-5"):
-        check_photon_stig_compliance()
 
     images_local_host_paths = get_images_local_host_path(args)
     jinja_args_map.update(images_local_host_paths)
@@ -483,13 +479,6 @@ def render_extra_repos(comma_sep_repo_list):
         output["remove_extra_repos"] = "true"
     print("Additional inflight package repos: ", json.dumps(output, indent=4))
     return output
-
-
-def check_photon_stig_compliance():
-    current_kubernetes_version = jinja_args_map["kubernetes_series"].replace(
-        'v', "")
-    if semver.compare(current_kubernetes_version, "1.25.0") >= 0:
-        jinja_args_map["photon_stig_compliance"] = "true"
 
 
 if __name__ == "__main__":

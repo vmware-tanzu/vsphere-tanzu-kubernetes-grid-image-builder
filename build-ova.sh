@@ -13,7 +13,6 @@ tkr_metadata_folder=${image_builder_root}/tkr-metadata/
 custom_ovf_properties_file=${image_builder_root}/custom_ovf_properties.json
 artifacts_output_folder=${image_builder_root}/artifacts
 ova_destination_folder=${artifacts_output_folder}/ovas
-photon_stig_compliance="false"
 ova_ts_suffix=$(date +%Y%m%d%H%M%S)
 
 function copy_custom_image_builder_files() {
@@ -73,40 +72,31 @@ function generate_custom_ovf_properties() {
     --outfile ${custom_ovf_properties_file}
 }
 
-function check_photon_stig_compliance() {
-    readarray -d + -t kubernetes_series_arr <<< "$KUBERNETES_VERSION"
-    kubernetes_series=$(echo "${kubernetes_series_arr[0]//v}")
-    printf -v versions '%s\n%s' "1.25.0" "$kubernetes_series"
-    if [[ $versions = "$(sort -V <<< "$versions")" ]]
-    then
-      photon_stig_compliance="true"
-      printf "OS_TYPE is photon, setting photon stig compliance flag to true.\n"
-    fi
-}
 
 function download_photon_stig_files() {
-    check_photon_stig_compliance
-    if [ ${photon_stig_compliance} == "true" ]
+    if [[ "$OS_TARGET" != "photon-3" && "$OS_TARGET" != "photon-5" ]]; then
+        echo "Skipping STIG setup as OS_TARGET is not Photon"
+        return
+    fi
+
+    stig_compliance_dir="${image_builder_root}/image/compliance"
+    if [ -d "$stig_compliance_dir" ]
     then
-        stig_compliance_dir="${image_builder_root}/image/compliance"
-        if [ -d "$stig_compliance_dir" ]
-        then
-            rm -rf "${stig_compliance_dir}"
-        fi
-        mkdir -p "${image_builder_root}/image/tmp"
-        if [ ${OS_TARGET} == "photon-3" ]
-        then
-            wget -q http://${HOST_IP}:${ARTIFACTS_CONTAINER_PORT}/artifacts/photon-3-stig-hardening.tar.gz
-            tar -xvf photon-3-stig-hardening.tar.gz -C "${image_builder_root}/image/tmp/"
-            mv ${image_builder_root}/image/tmp/photon-3-stig-hardening-* "${stig_compliance_dir}"
-            rm -rf photon-3-stig-hardening.tar.gz
-        elif [ ${OS_TARGET} == "photon-5" ]
-        then
-            wget -q http://${HOST_IP}:${ARTIFACTS_CONTAINER_PORT}/artifacts/vmware-photon-5.0-stig-ansible-hardening.tar.gz
-            tar -xvf vmware-photon-5.0-stig-ansible-hardening.tar.gz -C "${image_builder_root}/image/tmp/"
-            mv ${image_builder_root}/image/tmp/vmware-photon-5.0-stig-ansible-hardening-* "${stig_compliance_dir}"
-            rm -rf vmware-photon-5.0-stig-ansible-hardening.tar.gz
-        fi
+        rm -rf "${stig_compliance_dir}"
+    fi
+    mkdir -p "${image_builder_root}/image/tmp"
+    if [ ${OS_TARGET} == "photon-3" ]
+    then
+        wget -q http://${HOST_IP}:${ARTIFACTS_CONTAINER_PORT}/artifacts/photon-3-stig-hardening.tar.gz
+        tar -xvf photon-3-stig-hardening.tar.gz -C "${image_builder_root}/image/tmp/"
+        mv ${image_builder_root}/image/tmp/photon-3-stig-hardening-* "${stig_compliance_dir}"
+        rm -rf photon-3-stig-hardening.tar.gz
+    elif [ ${OS_TARGET} == "photon-5" ]
+    then
+        wget -q http://${HOST_IP}:${ARTIFACTS_CONTAINER_PORT}/artifacts/vmware-photon-5.0-stig-ansible-hardening.tar.gz
+        tar -xvf vmware-photon-5.0-stig-ansible-hardening.tar.gz -C "${image_builder_root}/image/tmp/"
+        mv ${image_builder_root}/image/tmp/vmware-photon-5.0-stig-ansible-hardening-* "${stig_compliance_dir}"
+        rm -rf vmware-photon-5.0-stig-ansible-hardening.tar.gz
     fi
 }
 
