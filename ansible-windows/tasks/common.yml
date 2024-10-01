@@ -1,0 +1,5 @@
+# Copyright 2024 VMware, Inc.
+# SPDX-License-Identifier: MPL-2.0
+
+- name: Copy goss binary
+  win_shell: cp "{{ additional_executables_destination_path }}\\goss.exe" "{{ goss_download_path }}"

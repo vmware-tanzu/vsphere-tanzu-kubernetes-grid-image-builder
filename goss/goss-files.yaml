@@ -1,0 +1,20 @@
+# Copyright 2023 VMware, Inc.
+# SPDX-License-Identifier: MPL-2.0
+
+file:
+{{range $name, $vers := index .Vars .Vars.OS "common-files"}}
+  {{ $name }}:
+    exists: {{ $vers.exists }}
+    filetype: {{ $vers.filetype }}
+    contains: {{ range $vers.contains}}
+    - {{.}}
+  {{end}}
+{{end}}
+{{range $name, $vers := index .Vars .Vars.OS .Vars.PROVIDER "files"}}
+  {{ $name }}:
+    exists: {{ $vers.exists }}
+    filetype: {{ $vers.filetype }}
+    contains: {{ range $vers.contains}}
+    - {{.}}
+  {{end}}
+{{end}}

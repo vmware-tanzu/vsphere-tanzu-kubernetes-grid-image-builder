@@ -175,11 +175,13 @@ def fetch_file_contents(addon_package):
     info = {}
     for filename in os.listdir(addon_package):
         with open(join(addon_package, filename), 'r') as file:
-            data = data + "---\n" + file.read()
-            file.seek(0)
+            content = file.read()
+            if not content.endswith("\n"):
+                content += "\n"
+            data = data + "---\n" + content
+
             if "metadata" not in filename:
-                info = yaml.safe_load(file)
-            file.close()
+                info = yaml.safe_load(content)
 
     return data, info
 
@@ -190,8 +192,11 @@ def append_addon_config(data, addon_package):
         filename = config_data_list[addon_package]
         config_data_list.pop(addon_package)
         with open(filename, 'r') as file:
-            data = data + "---\n" + file.read()
-            file.close()
+            content = file.read()
+            if not content.endswith("\n"):
+                content += "\n"
+            data = data + "---\n" + content
+
     return data
 
 
@@ -273,10 +278,12 @@ def create_utkg_tkr_metadata_ovf_properties():
         data = ""
 
         with open(filename, 'r') as file:
-            data = data + "---\n" + file.read()
-            file.seek(0)
-            info = yaml.safe_load(file)
-            file.close()
+            content = file.read()
+            if not content.endswith("\n"):
+                content += "\n"
+            data = data + "---\n" + content
+
+            info = yaml.safe_load(content)
             if "OSImage" in filename:
                 osi_content = {}
                 osi_content["name"] = info["metadata"]["name"]

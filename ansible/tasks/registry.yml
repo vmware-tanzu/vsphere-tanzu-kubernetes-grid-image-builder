@@ -1,0 +1,40 @@
+# Copyright 2024 VMware, Inc.
+# SPDX-License-Identifier: MPL-2.0
+
+- name: Create registry directory structure
+  file:
+    path: "{{ registry_root_directory | trim }}"
+    state: directory
+    mode: 0644
+
+- name: Download registry store tar archive
+  get_url:
+    url: "{{ registry_store_archive_url | trim }}"
+    dest: "{{ registry_root_directory | trim }}/registry.tar.gz"
+    mode: 0644
+  retries: 5
+  delay: 3
+
+- name: Unpack registry root directory
+  unarchive:
+    src: "{{ registry_root_directory | trim }}/registry.tar.gz"
+    dest: "{{ registry_root_directory | trim }}"
+    remote_src: yes
+
+- name: Remove registry store tar archive
+  file:
+    path: "{{ registry_root_directory | trim }}/registry.tar.gz"
+    state: absent
+
+- name: Retag Container Images
+  script: files/scripts/image_retag.py --k8sSemver {{ kubernetes_semver }} --dockerVersion {{ dockerVersion }} --family "{{ ansible_os_family }}"
+  args:
+    executable: python3
+
+- name: List images
+  shell: 'CONTAINERD_NAMESPACE="k8s.io" ctr --address=/var/run/containerd/containerd.sock images ls -q'
+  register: container_list
+
+- name: Print containers
+  debug:
+    var: container_list.stdout_lines

@@ -1,0 +1,57 @@
+# Copyright 2024 VMware, Inc.
+# SPDX-License-Identifier: MPL-2.0
+
+# - name: Generate random password
+#   win_random_string:
+#     length: 16
+#     special: no
+#     numeric: yes
+#     upper: yes
+#     lower: yes
+#     param: registry_secret
+#   register: registry_secret_result
+
+- name: Create registry directory structure
+  ansible.windows.win_file:
+    path: "{{ item }}"
+    state: directory
+    mode: 0644
+  with_items:
+    - "{{ registry_install_path | trim }}"
+    - "{{ registry_root_directory | trim }}"
+    - "{{ registry_log_directory | trim }}"
+
+- name: Copy registry binary to registry directory
+  win_shell: cp "{{ additional_executables_destination_path | trim }}\\registry.exe" "{{ registry_install_path | trim }}\\registry.exe"
+
+- name: Create registry config
+  ansible.windows.win_template:
+    src: registry/config.yml
+    dest: "{{ registry_install_path | trim }}\\config.yml"
+
+- name: Install registry via nssm
+  community.windows.win_nssm:
+    name: registry
+    start_mode: auto
+    state: started
+    application: "{{ registry_install_path | trim }}\\registry.exe"
+    arguments: "serve {{ registry_install_path | trim }}\\config.yml"
+    app_rotate_bytes: 10485760
+    stderr_file: "{{ registry_log_directory | trim }}\\registry.err.log"
+    stdout_file: "{{ registry_log_directory | trim }}\\registry.log"
+    app_rotate_online: 1
+
+- name: Download registry store tar archive
+  ansible.windows.win_get_url:
+    url: "{{ registry_store_archive_url | trim }}"
+    dest: "{{ registry_root_directory | trim }}/registry.tar.gz"
+  retries: 5
+  delay: 3
+
+- name: Unpack registry root directory
+  ansible.windows.win_command: cmd /c tar -zxvf "{{ registry_root_directory | trim }}/registry.tar.gz" -C "{{ registry_root_directory | trim }}"
+
+- name: Remove registry store tar archive
+  ansible.windows.win_file:
+    path: "{{ registry_root_directory | trim }}/registry.tar.gz"
+    state: absent

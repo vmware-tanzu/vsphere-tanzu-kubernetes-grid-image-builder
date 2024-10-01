@@ -1,13 +1,17 @@
 # Copyright 2023 VMware, Inc.
 # SPDX-License-Identifier: MPL-2.0
 
-FROM photon:5.0
+ARG BASE_IMAGE=library/photon:5.0
+FROM ${BASE_IMAGE}
 
 ARG IMAGE_BUILDER_COMMIT_ID=""
 ARG ANSIBLE_VERSION=2.15.10
+ARG IMAGE_BUILDER_REPO="https://github.com/kubernetes-sigs/image-builder.git"
 ARG IMAGE_BUILDER_REPO_NAME=image-builder
+ARG PACKER_GITHUB_API_TOKEN=""
 
 ENV PATH=${PATH}:/ovftool
+ENV LANG=en_US.UTF-8
 
 SHELL ["/bin/bash", "-c"]
 
@@ -26,7 +30,7 @@ RUN wget https://vdc-download.vmware.com/vmwb-repository/dcr-public/2ee5a010-bab
 RUN unzip VMware-ovftool-4.4.3-18663434-lin.x86_64.zip -d /
 
 # Setup image Builder code
-RUN git clone https://github.com/kubernetes-sigs/image-builder.git
+RUN git clone $IMAGE_BUILDER_REPO $IMAGE_BUILDER_REPO_NAME
 WORKDIR $IMAGE_BUILDER_REPO_NAME
 
 RUN git checkout $IMAGE_BUILDER_COMMIT_ID

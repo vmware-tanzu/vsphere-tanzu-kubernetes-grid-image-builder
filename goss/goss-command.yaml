@@ -2,6 +2,7 @@
 # SPDX-License-Identifier: MPL-2.0
 
 command:
+{{ if ne .Vars.OS "windows" }} # Linux Only
   containerd --version | awk -F' ' '{print substr($3,2); }':
     exit-status: 0
     stdout: []
@@ -12,12 +13,62 @@ command:
     stdout: []
     stderr: []
     timeout: 0
-# The second last pipe of awk is to take out arch from kube-apiserver-amd64 (i.e. amd64 or any other arch)
+{{if ne .Vars.containerd_wasm_shims_runtimes ""}}
+  containerd-shim-lunatic-v1:
+    exit-status: 1
+    stdout: [ ]
+    stderr: ["io.containerd.lunatic.v1: InvalidArgument(\"Shim namespace cannot be empty\")"]
+    timeout: 0
+  containerd-shim-slight-v1:
+    exit-status: 1
+    stdout: [ ]
+    stderr: ["io.containerd.slight.v1: InvalidArgument(\"Shim namespace cannot be empty\")"]
+    timeout: 0
+  containerd-shim-spin-v2:
+    exit-status: 1
+    stdout: [ ]
+    stderr: ["io.containerd.spin.v2: InvalidArgument(\"Shim namespace cannot be empty\")"]
+    timeout: 0
+  containerd-shim-wws-v1:
+    exit-status: 1
+    stdout: [ ]
+    stderr: ["io.containerd.wws.v1: InvalidArgument(\"Shim namespace cannot be empty\")"]
+    timeout: 0
+  grep -E 'io\.containerd\.(lunatic|slight|spin|wws)\.v' /etc/containerd/config.toml:
+    exit-status: 0
+    stdout: [ ]
+    stderr: [ ]
+    timeout: 0
+{{end}}
+{{if eq .Vars.kubernetes_source_type "pkg"}}
+{{if eq .Vars.kubernetes_cni_source_type "pkg"}}
+# Upstream IB uses 'print $2' for fetching image actual name, but in our case this will differ since we tag image to localhost registry 
   crictl images | grep -v 'IMAGE ID' | awk -F'[ /]' '{print $3}' | sed 's/-{{ .Vars.arch }}//g' | sort:
     exit-status: 0
     stderr: []
     timeout: 0
     stdout: ["coredns", "etcd", "kube-apiserver", "kube-controller-manager", "kube-proxy", "kube-scheduler", "pause"]
+{{end}}
+{{end}}
+{{if and (eq .Vars.kubernetes_source_type "http") (eq .Vars.kubernetes_cni_source_type "http") (not .Vars.kubernetes_load_additional_imgs)}}
+# The second last pipe of awk is to take out arch from kube-apiserver-amd64 (i.e. amd64 or any other arch)
+# Upstream IB uses 'print $2' for fetching image actual name, but in our case this will differ since we tag image to localhost registry 
+  crictl images | grep -v 'IMAGE ID' | awk -F'[ /]' '{print $3}' | sed 's/-{{ .Vars.arch }}//g' | sort:
+    exit-status: 0
+    stderr: []
+    timeout: 0
+    stdout: ["kube-apiserver", "kube-controller-manager", "kube-proxy", "kube-scheduler"]
+{{end}}
+{{if and (eq .Vars.kubernetes_source_type "http") (eq .Vars.kubernetes_cni_source_type "http") (.Vars.kubernetes_load_additional_imgs)}}
+# The second last pipe of awk is to take out arch from kube-apiserver-amd64 (i.e. amd64 or any other arch)
+# Upstream IB uses 'print $2' for fetching image actual name, but in our case this will differ since we tag image to localhost registry 
+  crictl images | grep -v 'IMAGE ID' | awk -F'[ /]' '{print $3}' | sed 's/-{{ .Vars.arch }}//g' | sort:
+    exit-status: 0
+    stderr: []
+    timeout: 0
+    stdout: ["coredns", "etcd", "kube-apiserver", "kube-controller-manager", "kube-proxy", "kube-scheduler", "pause"]
+{{end}}
+{{if eq .Vars.kubernetes_source_type "http"}}
   kubectl version --client -o json | jq .clientVersion.gitVersion | tr -d '"' | awk '{print substr($1,2); }':
     exit-status: 0
     stdout: [{{ .Vars.kubernetes_version }}]
@@ -33,8 +84,195 @@ command:
     stdout: [{{ .Vars.kubernetes_version }}]
     stderr: []
     timeout: 0
+{{end}}
+{{if eq .Vars.kubernetes_cni_source_type "http"}}
   /opt/cni/bin/host-device 2>&1 | awk -F' ' '{print substr($4,2); }':
     exit-status: 0
     stdout: [{{ .Vars.kubernetes_cni_version }}]
     stderr: []
     timeout: 0
+{{end}}
+{{if eq .Vars.OS "photon"}}
+  cat /sys/kernel/mm/transparent_hugepage/enabled:
+    exit-status: 0
+    stdout: ["always [madvise] never"]
+    stderr: []
+    timeout: 0
+{{end}}
+{{range $name, $vers := index .Vars .Vars.OS .Vars.PROVIDER "command"}}
+  {{ $name }}:
+  {{range $key, $val := $vers}}
+    {{$key}}: {{$val}}
+  {{end}}
+{{end}}
+{{end}} #End linux only
+
+{{ if eq .Vars.OS "windows" }} # Windows
+  automatic updates set to notify:
+    exit-status: 0
+    exec: powershell -command "(Get-ItemPropertyValue 'HKLM:\SOFTWARE\Policies\Microsoft\Windows\WindowsUpdate\AU' -name AUOptions) -eq '2'"
+    stdout:
+    - "True"
+    timeout: 30000
+  automatic updates set to notify with correct type:
+    exit-status: 0
+    exec: powershell -command "(Get-ItemPropertyValue 'HKLM:\SOFTWARE\Policies\Microsoft\Windows\WindowsUpdate\AU' -name AUOptions).GetType().Name -eq 'Int32'"
+    stdout:
+    - "True"
+    timeout: 30000
+  automatic updates are disabled:
+    exit-status: 0
+    exec: powershell -command "(Get-ItemPropertyValue 'HKLM:\SOFTWARE\Policies\Microsoft\Windows\WindowsUpdate\AU' -name NoAutoUpdate) -eq '1'"
+    stdout:
+    - "True"
+    timeout: 30000
+  automatic updates are disabled with correct type:
+    exit-status: 0
+    exec: powershell -command "(Get-ItemPropertyValue 'HKLM:\SOFTWARE\Policies\Microsoft\Windows\WindowsUpdate\AU' -name NoAutoUpdate).GetType().Name -eq 'Int32'"
+    stdout:
+    - "True"
+    timeout: 30000
+  kubectl version --client -o json:
+    exit-status: 0
+    stdout:
+    - {{.Vars.kubernetes_version}}
+    - "windows"
+    - {{.Vars.arch}}
+    timeout: 30000
+  kubeadm version:
+    exit-status: 0
+    stdout:
+    - {{.Vars.kubernetes_version}}
+    - "windows"
+    - {{.Vars.arch}}
+    timeout: 30000
+  kubelet --version:
+    exit-status: 0
+    stdout:
+    - {{.Vars.kubernetes_version}}
+    timeout: 10000
+{{ if eq .Vars.distribution_version "2019" }}
+  Windows build version is high enough:
+    exit-status: 0
+    exec: powershell -command "(Get-ItemProperty 'HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion' -Name UBR).UBR -ge 1817"
+    stdout:
+    - "True"
+    timeout: 30000
+  Check HNS Control Flag:
+    exit-status: 0
+    exec: powershell -command "(Get-ItemProperty -Path "HKLM:\SYSTEM\CurrentControlSet\Services\hns\State" -Name HNSControlFlag).HNSControlFlag -eq 80"
+    stdout:
+    - True
+    timeout: 30000
+  Check WCIFS Flag:
+    exit-status: 0
+    exec: powershell -command "(Get-ItemProperty 'HKLM:\SYSTEM\CurrentControlSet\Services\wcifs' -Name WcifsSOPCountDisabled).WcifsSOPCountDisabled -eq 0"
+    stdout:
+    - True
+    timeout: 30000
+{{end}}
+{{ if eq .Vars.runtime "containerd" }}
+  Correct Containerd Version:
+    exec: "\"/Program Files/containerd/containerd.exe\" --version"
+    exit-status: 0
+    stdout:
+    - "{{.Vars.containerd_version}}"
+    timeout: 30000
+  Correct Containerd config:
+    exec: "\"/Program Files/containerd/containerd.exe\" config dump"
+    exit-status: 0
+    stdout:
+    - "sandbox_image = \"{{.Vars.pause_image}}\""
+    - "conf_dir = \"C:/etc/cni/net.d\""
+    - "bin_dir = \"C:/opt/cni/bin\""
+    - "root = \"C:\\\\ProgramData\\\\containerd\\\\root\""
+    - "state = \"C:\\\\ProgramData\\\\containerd\\\\state\""
+    timeout: 30000
+  Check Windows Defender Exclusions are in place:
+    exit-status: 0
+    exec: powershell -command "(Get-MpPreference | select ExclusionProcess)"
+    stdout:
+    - \Program Files\containerd\containerd.exe,
+    - \Program Files\containerd\ctr.exe
+  Check SMB CompartmentNamespace Flag:
+    exit-status: 0
+    exec: powershell -command "(Get-ItemProperty 'HKLM:\SYSTEM\CurrentControlSet\Services\hns\State' -Name EnableCompartmentNamespace).EnableCompartmentNamespace -eq 1"
+    stdout:
+    - True
+    timeout: 30000
+  Windows Port Range is Expanded:
+    exit-status: 0
+    exec: netsh int ipv4 show dynamicportrange tcp
+    stdout:
+    - "Start Port      : 34000"
+    - "Number of Ports : 31536"
+    timeout: 30000
+{{end}}
+
+{{if eq .Vars.PROVIDER "azure"}}
+  Verify firewall rule to block 168.63.129.16:80 for cve-2021-27075:
+    exit-status: 0
+    exec: powershell -command "(Get-NetFirewallRule -ErrorAction Stop -DisplayName 'Block-Outbound-168.63.129.16-port-80-for-cve-2021-27075').Enabled"
+    stdout:
+    - True
+    stderr: []
+    timeout: 30000
+
+  # this could be moved to place for other providers if they want to install it
+  Key Vault gMSA binary is installed:
+    exec: powershell -command "Test-Path -Path  C:\Windows\System32\CCGAKVPlugin.dll"
+    exit-status: 0
+    stdout:
+    - "True"
+    timeout: 30000
+  Key Vault gMSA binary COM is registered:
+    exec: powershell -command "(Get-Item 'HKLM:SYSTEM\CurrentControlSet\Control\CCG\COMClasses\{CCC2A336-D7F3-4818-A213-272B7924213E}')  | Ft -autosize -wrap"
+    exit-status: 0
+    stdout:
+    - "CCC2A336-D7F3-4818-A213-272B7924213E"
+    timeout: 30000
+  Key Vault gMSA binary is registered:
+    exec: powershell -command "Get-ItemProperty -Path 'HKLM:SOFTWARE\CLASSES\CLSID\{CCC2A336-D7F3-4818-A213-272B7924213E}\InprocServer32\'"
+    exit-status: 0
+    stdout:
+    - "C:\\Windows\\System32\\CCGAKVPlugin.dll"
+    timeout: 30000
+  Key Vault gMSA CCG interface is registered:
+    exec: powershell -command "(Get-Item 'HKLM:SOFTWARE\Classes\Interface\{6ECDA518-2010-4437-8BC3-46E752B7B172}') | Ft -autosize -wrap"
+    exit-status: 0
+    stdout:
+    - "ICcgDomainAuthCredentials"
+    timeout: 30000
+  Check Azure CLI is installed via alias:
+    exec: powershell -command "az"
+    exit-status: 0
+    timeout: 30000
+{{end}}
+
+{{ if ne .Vars.ssh_source_url "" }}
+  Check permission of OpenSSH directory for SYSTEM:
+    exec: powershell -command "((Get-Acl 'C:\Program Files\OpenSSH').Access | Where-Object{$_.IdentityReference -eq 'NT AUTHORITY\SYSTEM' -and $_.FileSystemRights -eq 'FullControl'}) -ne $null"
+    exit-status: 0
+    stdout:
+    - True
+    timeout: 30000
+  Check permission of OpenSSH directory for Administrators:
+    exec: powershell -command "((Get-Acl 'C:\Program Files\OpenSSH').Access | Where-Object{$_.IdentityReference -eq 'BUILTIN\Administrators' -and $_.FileSystemRights -eq 'FullControl'}) -ne $null"
+    exit-status: 0
+    stdout:
+    - True
+    timeout: 30000
+  Check permission of OpenSSH directory for Users:
+    exec: powershell -command "((Get-Acl 'C:\Program Files\OpenSSH').Access | Where-Object{$_.IdentityReference -eq 'BUILTIN\Users' -and $_.FileSystemRights -eq 'ReadAndExecute, Synchronize'}) -eq $null"
+    exit-status: 0
+    stdout:
+    - True
+    timeout: 30000
+  Check if SSH server port is open:
+    exec: powershell -command "(Get-NetFirewallRule -ErrorAction Stop -DisplayName 'sshd').Enabled"
+    exit-status: 0
+    stdout:
+        - True
+    timeout: 30000
+{{end}}
+{{end}} #end windows

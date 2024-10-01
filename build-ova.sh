@@ -13,7 +13,6 @@ tkr_metadata_folder=${image_builder_root}/tkr-metadata/
 custom_ovf_properties_file=${image_builder_root}/custom_ovf_properties.json
 artifacts_output_folder=${image_builder_root}/artifacts
 ova_destination_folder=${artifacts_output_folder}/ovas
-photon_stig_compliance="false"
 ova_ts_suffix=$(date +%Y%m%d%H%M%S)
 
 function copy_custom_image_builder_files() {
@@ -37,6 +36,17 @@ function download_configuration_files() {
 # Generate packaer input variables based on packer-variables folder
 function generate_packager_configuration() {
     mkdir -p $ova_destination_folder
+    TKR_SUFFIX_ARG=
+    [[ -n "$TKR_SUFFIX" ]] && TKR_SUFFIX_ARG="--tkr_suffix ${TKR_SUFFIX}"
+
+    # additional_packer_variables
+    ADDITIONAL_PACKER_VAR_FILES_LIST=
+    [[ -n "$ADDITIONAL_PACKER_VARIABLE_FILES" ]] && ADDITIONAL_PACKER_VAR_FILES_LIST="--additional_packer_variables ${ADDITIONAL_PACKER_VARIABLE_FILES}"
+
+    # override_package_repositories
+    OVERRIDE_PACKAGE_REPO_FILE_LIST=
+    [[ -n "${OVERRIDE_PACKAGE_REPOS}" ]] && OVERRIDE_PACKAGE_REPO_FILE_LIST="--override_package_repositories ${OVERRIDE_PACKAGE_REPOS}"
+
     python3 image/scripts/tkg_byoi.py setup \
     --host_ip ${HOST_IP} \
     --artifacts_container_port ${ARTIFACTS_CONTAINER_PORT} \
@@ -44,11 +54,13 @@ function generate_packager_configuration() {
     --default_config_folder ${default_packer_variables} \
     --dest_config ${packer_configuration_folder} \
     --tkr_metadata_folder ${tkr_metadata_folder} \
-    --tkr_suffix ${TKR_SUFFIX} \
+    ${TKR_SUFFIX_ARG} \
     --kubernetes_config ${image_builder_root}/kubernetes_config.json \
     --ova_destination_folder ${ova_destination_folder} \
     --os_type ${OS_TARGET} \
-    --ova_ts_suffix ${ova_ts_suffix}
+    --ova_ts_suffix ${ova_ts_suffix} \
+    ${ADDITIONAL_PACKER_VAR_FILES_LIST} \
+    ${OVERRIDE_PACKAGE_REPO_FILE_LIST}
 
     echo "Image Builder Packer Variables"
     cat ${packer_configuration_folder}/packer-variables.json
@@ -60,40 +72,31 @@ function generate_custom_ovf_properties() {
     --outfile ${custom_ovf_properties_file}
 }
 
-function check_photon_stig_compliance() {
-    readarray -d + -t kubernetes_series_arr <<< "$KUBERNETES_VERSION"
-    kubernetes_series=$(echo "${kubernetes_series_arr[0]//v}")
-    printf -v versions '%s\n%s' "1.25.0" "$kubernetes_series"
-    if [[ $versions = "$(sort -V <<< "$versions")" ]]
-    then
-      photon_stig_compliance="true"
-      printf "OS_TYPE is photon, setting photon stig compliance flag to true.\n"
-    fi
-}
 
 function download_photon_stig_files() {
-    check_photon_stig_compliance
-    if [ ${photon_stig_compliance} == "true" ]
+    if [[ "$OS_TARGET" != "photon-3" && "$OS_TARGET" != "photon-5" ]]; then
+        echo "Skipping STIG setup as OS_TARGET is not Photon"
+        return
+    fi
+
+    stig_compliance_dir="${image_builder_root}/image/compliance"
+    if [ -d "$stig_compliance_dir" ]
     then
-        stig_compliance_dir="${image_builder_root}/image/compliance"
-        if [ -d "$stig_compliance_dir" ]
-        then
-            rm -rf "${stig_compliance_dir}"
-        fi
-        mkdir -p "${image_builder_root}/image/tmp"
-        if [ ${OS_TARGET} == "photon-3" ]
-        then
-            wget -q http://${HOST_IP}:${ARTIFACTS_CONTAINER_PORT}/artifacts/photon-3-stig-hardening.tar.gz
-            tar -xvf photon-3-stig-hardening.tar.gz -C "${image_builder_root}/image/tmp/"
-            mv ${image_builder_root}/image/tmp/photon-3-stig-hardening-* "${stig_compliance_dir}"
-            rm -rf photon-3-stig-hardening.tar.gz
-        elif [ ${OS_TARGET} == "photon-5" ]
-        then
-            wget -q http://${HOST_IP}:${ARTIFACTS_CONTAINER_PORT}/artifacts/vmware-photon-5.0-stig-ansible-hardening.tar.gz
-            tar -xvf vmware-photon-5.0-stig-ansible-hardening.tar.gz -C "${image_builder_root}/image/tmp/"
-            mv ${image_builder_root}/image/tmp/vmware-photon-5.0-stig-ansible-hardening-* "${stig_compliance_dir}"
-            rm -rf vmware-photon-5.0-stig-ansible-hardening.tar.gz
-        fi
+        rm -rf "${stig_compliance_dir}"
+    fi
+    mkdir -p "${image_builder_root}/image/tmp"
+    if [ ${OS_TARGET} == "photon-3" ]
+    then
+        wget -q http://${HOST_IP}:${ARTIFACTS_CONTAINER_PORT}/artifacts/photon-3-stig-hardening.tar.gz
+        tar -xvf photon-3-stig-hardening.tar.gz -C "${image_builder_root}/image/tmp/"
+        mv ${image_builder_root}/image/tmp/photon-3-stig-hardening-* "${stig_compliance_dir}"
+        rm -rf photon-3-stig-hardening.tar.gz
+    elif [ ${OS_TARGET} == "photon-5" ]
+    then
+        wget -q http://${HOST_IP}:${ARTIFACTS_CONTAINER_PORT}/artifacts/vmware-photon-5.0-stig-ansible-hardening.tar.gz
+        tar -xvf vmware-photon-5.0-stig-ansible-hardening.tar.gz -C "${image_builder_root}/image/tmp/"
+        mv ${image_builder_root}/image/tmp/vmware-photon-5.0-stig-ansible-hardening-* "${stig_compliance_dir}"
+        rm -rf vmware-photon-5.0-stig-ansible-hardening.tar.gz
     fi
 }
 
@@ -102,7 +105,8 @@ function packer_logging() {
     mkdir /image-builder/packer_cache
     mkdir -p $artifacts_output_folder/logs
     export PACKER_LOG=10
-    export PACKER_LOG_PATH="${artifacts_output_folder}/logs/packer-$RANDOM.log"
+    datetime=$(date '+%Y%m%d%H%M%S')
+    export PACKER_LOG_PATH="${artifacts_output_folder}/logs/packer-$datetime-$RANDOM.log"
     echo "Generating packer logs to $PACKER_LOG_PATH"
 }
 
@@ -119,10 +123,13 @@ function trigger_image_builder() {
 # Packer generates OVA with a different name so change the OVA name to OSImage/VMI and
 # copy to the destination folder.
 function copy_ova() {
+    TKR_SUFFIX_ARG=
+    [[ -n "$TKR_SUFFIX" ]] && TKR_SUFFIX_ARG="--tkr_suffix ${TKR_SUFFIX}"
     python3 image/scripts/tkg_byoi.py copy_ova \
     --kubernetes_config ${image_builder_root}/kubernetes_config.json \
     --tkr_metadata_folder ${tkr_metadata_folder} \
-    --tkr_suffix ${TKR_SUFFIX} --os_type ${OS_TARGET} \
+    ${TKR_SUFFIX_ARG} \
+    --os_type ${OS_TARGET} \
     --ova_destination_folder ${ova_destination_folder} \
     --ova_ts_suffix ${ova_ts_suffix}
 }
