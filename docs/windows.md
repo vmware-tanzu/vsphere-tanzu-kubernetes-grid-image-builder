@@ -29,20 +29,21 @@ In this tutorial, we use Windows Server 22H2 `en-us_windows_server_2022_x64_dvd_
 
 ### Install govc (Optional)
 
-You may follow the [govc documentation](https://github.com/vmware/govmomi/blob/main/govc/README.md)
-to install govc on the Linux VM you're building the image.
+You may follow the [govc documentation](https://github.com/vmware/govmomi/blob/main/govc/README.md) to install govc on the Linux VM you're building the image.
+
+You may use the below example bash commands to upload Windows Server 22H2 ISO and the VMware Tools Windows ISO to your vCenter instance.
 
 ```bash
-$ export GOVC_URL=[VC_URL]
-$ export GOVC_USERNAME=[VC_USERNAME]
-$ export GOVC_PASSWORD=[VC_PASSWORD]
-$ export GOVC_INSECURE=1
-$ export GOVC_DATACENTER=Datacenter
-$ export GOVC_CLUSTER=Management-Cluster
-$ export GOVC_DATASTORE=datastore22
+export GOVC_URL=[VC_URL]
+export GOVC_USERNAME=[VC_USERNAME]
+export GOVC_PASSWORD=[VC_PASSWORD]
+export GOVC_INSECURE=1
+export GOVC_DATACENTER=Datacenter
+export GOVC_CLUSTER=Management-Cluster
+export GOVC_DATASTORE=datastore22
 
-$ govc datastore.upload --ds="$GOVC_DATASTORE" --dc="$GOVC_DATACENTER" en-us_windows_server_2022_x64_dvd_620d7eac.iso windows2022.iso
-$ govc datastore.upload --ds="$GOVC_DATASTORE" --dc="$GOVC_DATACENTER" VMware-tools-windows-12.5.0-23800621.iso vmtools.iso
+govc datastore.upload --ds="$GOVC_DATASTORE" --dc="$GOVC_DATACENTER" en-us_windows_server_2022_x64_dvd_620d7eac.iso windows2022.iso
+govc datastore.upload --ds="$GOVC_DATASTORE" --dc="$GOVC_DATACENTER" VMware-tools-windows-12.5.0-23800621.iso vmtools.iso
 ```
 
 Alternatively, you may use the vCenter UI to upload the ISOs to the datastore.
@@ -60,8 +61,8 @@ In order for the Windows nodes to work with the [vSphere Kubernetes Service supp
 The following snippet shows how to add an administrative account in the answer file.
 
 ```bash
-$ curl https://raw.githubusercontent.com/kubernetes-sigs/image-builder/refs/heads/main/images/capi/packer/ova/windows/windows-2022-efi/autounattend.xml -o /home/image-builder/windows_autounattend.xml
-$ vi /home/image-builder/windows_autounattend.xml
+curl https://raw.githubusercontent.com/kubernetes-sigs/image-builder/refs/heads/main/images/capi/packer/ova/windows/windows-2022-efi/autounattend.xml -o /home/image-builder/windows_autounattend.xml
+vi /home/image-builder/windows_autounattend.xml
 ```
 
 Locate the `LocalAccounts` in the xml and add a new `LocalAccount` to this section.
@@ -144,7 +145,7 @@ NOTE: You need to match the ISO image file names in the datastore.
 From the `vsphere-tanzu-kubernetes-grid-image-builder` directory where the Makefile is located run:
 
 ```bash
-$ make list-versions
+make list-versions
 ```
 
 Windows container workload support is only available in Kubernetes release v1.31 and above.
@@ -154,13 +155,13 @@ Windows container workload support is only available in Kubernetes release v1.31
 Usage:
 
 ```bash
-$ make run-artifacts-container KUBERNETES_VERSION=<version>
+make run-artifacts-container KUBERNETES_VERSION=<version>
 ```
 
 Example:
 
 ```bash
-$ make run-artifacts-container KUBERNETES_VERSION=v1.31.1+vmware.2-fips
+make run-artifacts-container KUBERNETES_VERSION=v1.31.1+vmware.2-fips
 ```
 
 ## Run the Image Builder Application
@@ -168,14 +169,17 @@ $ make run-artifacts-container KUBERNETES_VERSION=v1.31.1+vmware.2-fips
 Usage:
 
 ```bash
-$ make build-node-image OS_TARGET=<os_target> KUBERNETES_VERSION=v1.31.1+vmware.2-fips TKR_SUFFIX=<tkr_suffix> HOST_IP=<host_ip> IMAGE_ARTIFACTS_PATH=<image_artifacts_path> ARTIFACTS_CONTAINER_PORT=8081
+make build-node-image OS_TARGET=<os_target> KUBERNETES_VERSION=v1.31.1+vmware.2-fips TKR_SUFFIX=<tkr_suffix> HOST_IP=<host_ip> IMAGE_ARTIFACTS_PATH=<image_artifacts_path> ARTIFACTS_CONTAINER_PORT=8081
 ```
 
 NOTE:
-* The HOST_IP must be reachable from the vCenter.
-* You need to use the Kubernetes version which supports Windows. You may check Windows is in the Supported OS from
+
+- The HOST_IP must be reachable from the vCenter.
+
+- You need to use the Kubernetes version which supports Windows. You may check Windows is in the Supported OS from
 the result from `make list-versions`.
-* You may list the Kubernetes in your Supervisor cluster to get the version suffix.
+
+- You may list the Kubernetes in your Supervisor cluster to get the version suffix.
 
 ```bash
 $ kubectl get kr
@@ -187,7 +191,7 @@ kubernetesrelease.kubernetes.vmware.com/v1.31.1---vmware.2-fips-vkr.2   v1.31.1+
 Example:
 
 ```bash
-$ make build-node-image OS_TARGET=windows-2022-efi KUBERNETES_VERSION=v1.31.1+vmware.2-fips TKR_SUFFIX=vkr.2 HOST_IP=192.2.2.3 IMAGE_ARTIFACTS_PATH=/home/image-builder/image ARTIFACTS_CONTAINER_PORT=8081 AUTO_UNATTEND_ANSWER_FILE_PATH=/home/image-builder/windows_autounattend.xml
+make build-node-image OS_TARGET=windows-2022-efi KUBERNETES_VERSION=v1.31.1+vmware.2-fips TKR_SUFFIX=vkr.2 HOST_IP=192.2.2.3 IMAGE_ARTIFACTS_PATH=/home/image-builder/image ARTIFACTS_CONTAINER_PORT=8081 AUTO_UNATTEND_ANSWER_FILE_PATH=/home/image-builder/windows_autounattend.xml
 ```
 
 ## Verify the Custom Image
@@ -221,14 +225,14 @@ You may refer to [vSphere Kubernetes Service 3.2 documentation]() for more infor
 
 ### Kubernetes Release v1.31
 
-* The minimum vmclass should be best-effort-large for Windows Worker Node 
+- The minimum vmclass should be best-effort-large for Windows Worker Node
 
   When a windows worker node is configured with a vm-class which has resource configuration lower than best-effort-large, some of the management pods may not run due to loss of network connectivity.
 
-  Resolution: 
+  Resolution:
   Switch to a vmclass configured with more resources.
 
-* Some Pods on Window Node's networking don't work correctly
+- Some Pods on Window Node's networking don't work correctly
 
   Some Pods on Window Node's networking don’t work correctly, which makes the Pod is not reachable, or the Pod can’t access other network peers.
 

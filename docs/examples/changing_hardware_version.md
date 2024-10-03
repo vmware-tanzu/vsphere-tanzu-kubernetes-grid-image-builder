@@ -6,7 +6,7 @@ As a customer, I want to change the Hardware version of the node image to use th
 
 ## Background
 
-By default, node images use the hardware version(`VMX`) 17. Please refer to the below documents to learn more about the hardware version and its compatibility with the vSphere environment.
+By default, node images use the hardware version(`VMX`) 17 defined in [default-args.j2][default-args](Windows uses hardware version 18 by default defined in [default-args-windows.j2][default-args-windows]). Please refer to the below documents to learn more about the hardware version and its compatibility with the vSphere environment.
 
 - [Hardware Features Available with Virtual Machine Compatibility Settings](https://docs.vmware.com/en/VMware-vSphere/8.0/vsphere-vm-administration/GUID-789C3913-1053-4850-A0F0-E29C3D32B6DA.html)
 - [ESXi/ESX hosts and compatible virtual machine hardware versions list](https://kb.vmware.com/s/article/2007240)
@@ -19,7 +19,10 @@ By default, node images use the hardware version(`VMX`) 17. Please refer to the 
     "vmx_version": "17",
 ```
 
+- _**Note**: For Windows, update the `vmx_version` in the [default-args-windows.j2][default-args-windows] file._
+
 [//]: Links
 
 [default-args]: [./../../../packer-variables/default-args.j2]
 [kubernetes-image-builder]: https://github.com/kubernetes-sigs/image-builder/
+[default-args-windows]: ../../packer-variables/windows/default-args-windows.j2
