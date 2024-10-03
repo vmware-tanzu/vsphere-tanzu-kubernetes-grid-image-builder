@@ -126,6 +126,8 @@ make build-node-image OS_TARGET=photon-3 KUBERNETES_VERSION=v1.23.15+vmware.1 TK
 
 Sample customization examples can be found [here](docs/examples/README.md)
 
+For Windows support you may refer to [Windows tutorial](docs/windows.md)
+
 ## Debugging
 
 - To enable debugging for the [make file scripts](hack/make-helpers/) export `DEBUGGING=true`.

@@ -3,3 +3,4 @@
 !.gitignore
 scripts/__pycache__
 output*
+.idea
