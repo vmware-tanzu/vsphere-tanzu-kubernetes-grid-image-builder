@@ -35,7 +35,7 @@ _**Note**: The location of default configuration specific to OS follows the path
 
 - Create new folder `repos` in [ansible files][ansible-files] folder
 - Depending upon the Linux OS flavour, use either of the below steps
-  - For Photon sources, create a new file called `photon.repo` in the `repos` folder. Refer below for sample content and refer to the official Photon [document][photon-repo-doc] for more information.
+  - For **Photon** sources, create a new file called `photon.repo` in the `repos` folder. Refer below for sample content and refer to the official Photon [document][photon-repo-doc] for more information.
 
   ```text
   [photon]
@@ -60,7 +60,7 @@ _**Note**: The location of default configuration specific to OS follows the path
   enabled=1
   ```
 
-  - For Ubuntu sources, create a new file called `ubuntu.list` in the `repos` folder. Refer to the official ubuntu [documentation][ubuntu-sources-doc] for more information.
+  - For **Ubuntu** sources, create a new file called `ubuntu.list` in the `repos` folder. Refer to the official ubuntu [documentation][ubuntu-sources-doc] for more information.
     - _**Note**: `jammy` is for ubuntu 22.04 so this needs to be changed if the ubuntu version is also changed, example for ubuntu 20.04 it is `focal`_
 
 ```text

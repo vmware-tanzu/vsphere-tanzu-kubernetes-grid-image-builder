@@ -1,15 +1,14 @@
 # Tutorial for Using the vSphere Tanzu Kubernetes Grid Image Builder
 
-This tutorial describes how to use the vSphere Tanzu Kubernetes Grid Image Builder to build a custom TKR for use with TKG 2 on Supervisor in the vSphere with Tanzu environment.
+This tutorial describes how to use the vSphere Tanzu Kubernetes Grid Image Builder to build a custom TKR for use on Supervisor in the vSphere.
 
 The vSphere Tanzu Kubernetes Grid Image Builder uses Hashicorp Packer to generate images. Packer invokes vCenter APIs to create a VM from a TKR.
 
 ## Requirements
 
-- Check the [prerequisites](tkg#prerequisites)
-- vCenter Server 8, which can be any vCenter 8 instance, it does not have to be the same vCenter managing your vSphere with Tanzu environment
+- vCenter Server 8, which can be any vCenter 8 instance, it does not have to be the same vCenter managing your vSphere
 - Packer requires the vSphere environment to have DHCP configured; you cannot use static IP address management
-- Tutorial uses Ubuntu v1.22 to generate the image
+- Tutorial uses Ubuntu 22.04 based Linux VM to generate the image
 
 ## Clone the Repository
 
@@ -23,43 +22,7 @@ git clone https://github.com/vmware-tanzu/vsphere-tanzu-kubernetes-grid-image-bu
 
 The vSphere Tanzu Kubernetes Grid Image Builder runs components as Docker images to generate VMs.
 
-Docker requires a 64-bit system with a Linux kernel having version 3.10 or newer.
-
-Use the `uname` command to check the version of your kernel:
-
-```bash
-uname -r
-```
-
-Docker provides a convenience script to install the latest version of Docker for testing, dev and lab purposes.
-
-```bash
-wget -qO- https://get.docker.com/ | sh
-```
-
-Remove the need for sudo execution of docker commands.  
-
-```bash
-sudo usermod -aG docker $(whoami)
-```
-
-Log out of the shell and log back in.
-
-```bash
-exit
-```
-
-Check if you can invoke the Docker client without sudo.
-
-```bash
-docker --version
-```
-
-Verify that the Docker daemon (dockerd engine) is running using the system service interface system.
-
-```bash
-systemctl status --full docker
-```
+Refer to the [Docker installation guide][docker-installation] for setting up Docker Engine.
 
 ## Install JQ
 
@@ -126,19 +89,23 @@ For example:
     {# TO create a clone of the Packer VM after customization#}
     "linked_clone": "true",
     {# To create a snapshot of the Packer VM after customization #}
-    "create_snapshot": "true"
+    "create_snapshot": "true",
+    {# To destroy Packer VM after Image Build is completed #}
+    "destroy": "true"
 }
 ```
 
 ## Select Kubernetes version
 
-From the `vsphere-tanzu-kubernetes-grid-image-builder` directory where the Makefile is located run:
+To identify the version of Kubernetes Release to be used, from the `vsphere-tanzu-kubernetes-grid-image-builder` directory where the Makefile is located run:
 
 ```bash
 make list-versions
 ```
 
-## Run the Artifacts Container for the Selected Kubernetes Version
+## Run the Artifacts Server Container for the Selected Kubernetes Version
+
+Running the `run-artifacts-container` Makefile target, will pull the Artifacts Server container image corresponding to the selected Kubernetes Release.
 
 Usage:
 
@@ -149,7 +116,7 @@ make run-artifacts-container KUBERNETES_VERSION=<version>
 Example:
 
 ```bash
-make run-artifacts-container KUBERNETES_VERSION=v1.24.9+vmware.1
+make run-artifacts-container KUBERNETES_VERSION=v1.31.1+vmware.2-fips
 ```
 
 ## Run the Image Builder Application
@@ -157,7 +124,7 @@ make run-artifacts-container KUBERNETES_VERSION=v1.24.9+vmware.1
 Usage:
 
 ```bash
-make build-node-image OS_TARGET=<os_target> KUBERNETES_VERSION=v1.24.9+vmware.1 TKR_SUFFIX=<tkr_suffix> HOST_IP=<host_ip> IMAGE_ARTIFACTS_PATH=<image_artifacts_path> ARTIFACTS_CONTAINER_PORT=8081
+make build-node-image OS_TARGET=<os_target> KUBERNETES_VERSION=v1.31.1+vmware.2-fips TKR_SUFFIX=<tkr_suffix> HOST_IP=<host_ip> IMAGE_ARTIFACTS_PATH=<image_artifacts_path> ARTIFACTS_CONTAINER_PORT=8081
 ```
 
 NOTE: The HOST_IP must be reachable from the vCenter.
@@ -165,7 +132,7 @@ NOTE: The HOST_IP must be reachable from the vCenter.
 Example:
 
 ```bash
-make build-node-image OS_TARGET=ubuntu-2004-efi KUBERNETES_VERSION=v1.24.9+vmware.1 TKR_SUFFIX=byoi HOST_IP=192.2.2.3 IMAGE_ARTIFACTS_PATH=/home/ubuntu/image ARTIFACTS_CONTAINER_PORT=8081
+make build-node-image OS_TARGET=ubuntu-2004-efi KUBERNETES_VERSION=v1.31.1+vmware.2-fips TKR_SUFFIX=byoi HOST_IP=192.2.2.3 IMAGE_ARTIFACTS_PATH=/home/ubuntu/image ARTIFACTS_CONTAINER_PORT=8081
 ```
 
 ## Verify the Custom Image
@@ -180,14 +147,19 @@ You should see the image being built in the datacenter, cluster, folder that you
 
 ## Customize the image
 
-Refer to the customization examples.
+Refer to the [customization examples][customizations].
 
-## Upload the Image to the TKG 2 with Supervisor Environment
+## Upload the Image to generate custom Kubernetes Release
 
 Download the custom image from local storage or from the vCenter Server.
 
-In your vSphere with Tanzu environment, create a local content library and upload the custom image there.
+In your vSphere environment, create a local content library and upload the custom image there.
 
-Refer to the documentation for [creating a local content library](https://docs.vmware.com/en/VMware-vSphere/8.0/vsphere-with-tanzu-tkg/GUID-19E8E034-5256-4EFC-BEBF-D4F17A8ED021.html) for use with TKG with Supervisor.
+Refer to the documentation for [creating a local content library][create-local-content-library] for use with Supervisor.
 
 To use the custom TKR, configure the vSphere Namespace to use the local content library.
+
+[//]: Links
+[docker-installation]: https://docs.docker.com/engine/install/
+[create-local-content-library]: https://docs.vmware.com/en/VMware-vSphere/8.0/vsphere-with-tanzu-tkg/GUID-19E8E034-5256-4EFC-BEBF-D4F17A8ED021.html
+[customizations]: ./customizations/README.md
