@@ -659,8 +659,8 @@ tkg:
         running: true
         enabled: true
       systemd-timesyncd.service:
+        enabled: false
         running: false
-        masked: true
     kernel-param:
     ova:
       os_version:
@@ -737,8 +737,8 @@ tkg:
         enabled: true
         running: true
       systemd-timesyncd.service:
+        enabled: false
         running: false
-        masked: true
       sshd-keygen.service:
         enabled: true
         running: true
