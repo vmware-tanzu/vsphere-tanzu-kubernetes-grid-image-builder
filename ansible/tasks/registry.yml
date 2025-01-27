@@ -31,8 +31,8 @@
   args:
     executable: python3
 
-- name: Read registry version
-  ansible.builtin.script: files/scripts/docker_registry_ops.py --version
+- name: Pin container images
+  ansible.builtin.script: files/scripts/docker_registry_ops.py --pin
   register: registry_version
   args:
     executable: python3
