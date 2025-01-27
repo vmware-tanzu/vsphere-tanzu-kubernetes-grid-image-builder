@@ -31,6 +31,12 @@
   args:
     executable: python3
 
+- name: Read registry version
+  ansible.builtin.script: files/scripts/docker_registry_ops.py --version
+  register: registry_version
+  args:
+    executable: python3
+
 - name: List images
   shell: 'CONTAINERD_NAMESPACE="k8s.io" ctr --address=/var/run/containerd/containerd.sock images ls -q'
   register: container_list

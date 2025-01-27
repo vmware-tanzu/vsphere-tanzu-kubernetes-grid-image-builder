@@ -20,9 +20,11 @@
   register: registry_store_url_check
   ignore_errors: true
 
+# Used in Windows OVA builds
 - import_tasks: registry.yml
   when: registry_store_url_check.status == 200
 
+# Used in Linux OVA builds
 - import_tasks: retag_images.yml
   when: registry_store_url_check.status != 200
 
