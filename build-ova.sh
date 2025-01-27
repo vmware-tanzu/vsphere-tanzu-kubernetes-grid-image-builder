@@ -99,10 +99,10 @@ function download_stig_files() {
         rm -rf vmware-photon-5.0-stig-ansible-hardening.tar.gz
     elif [ ${OS_TARGET} == "ubuntu-2204-efi" ]
     then
-        wget -q http://${HOST_IP}:${ARTIFACTS_CONTAINER_PORT}/artifacts/vmware-ubuntu-stig-ansible-hardening.tar.gz
-        tar -xvf vmware-ubuntu-stig-ansible-hardening.tar.gz -C "${image_builder_root}/image/tmp/"
+        wget -q http://${HOST_IP}:${ARTIFACTS_CONTAINER_PORT}/artifacts/vmware-ubuntu-22.04-stig-ansible-hardening.tar.gz
+        tar -xvf vmware-ubuntu-22.04-stig-ansible-hardening.tar.gz -C "${image_builder_root}/image/tmp/"
         mv ${image_builder_root}/image/tmp/vmware-ubuntu-22.04-stig-ansible-hardening-* "${stig_compliance_dir}"
-        rm -rf vmware-ubuntu-stig-ansible-hardening.tar.gz
+        rm -rf vmware-ubuntu-22.04-stig-ansible-hardening.tar.gz
     fi
 }
 
