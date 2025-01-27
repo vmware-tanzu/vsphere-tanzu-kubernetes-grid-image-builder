@@ -736,6 +736,9 @@ tkg:
       sshd.service:
         enabled: true
         running: true
+      systemd-timesyncd.service:
+        running: false
+        masked: true
       sshd-keygen.service:
         enabled: true
         running: true
