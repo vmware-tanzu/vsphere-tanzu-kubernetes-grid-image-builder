@@ -59,5 +59,16 @@
         "docker_build_args": {
             "IMAGE_BUILDER_COMMIT_ID": "ed30bc3e7b71ea41d2f79a16789d2b291d9f43d1"
         }
+    },
+  "v1.31.2+vmware.1-fips": {
+    "supported_os": [
+      "photon-5",
+      "ubuntu-2204-efi",
+      "windows-2022-efi"
+    ],
+    "artifacts_image": "vmware.io/vkr-artifact-server:v1.31.2_vmware.1-fips-dev.3",
+    "docker_build_args": {
+      "IMAGE_BUILDER_COMMIT_ID": "ed30bc3e7b71ea41d2f79a16789d2b291d9f43d1"
     }
+  }
 }
