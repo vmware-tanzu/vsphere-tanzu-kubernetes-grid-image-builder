@@ -1,1 +1,1 @@
-v1.32.0-beta.0+vmware.1-fips
+v1.32.0+vmware.6-fips
