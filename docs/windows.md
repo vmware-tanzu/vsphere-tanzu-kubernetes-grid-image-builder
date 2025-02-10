@@ -1,6 +1,6 @@
 # Building Windows Image Using the vSphere Tanzu Kubernetes Grid Image Builder
 
-This tutorial describes how to use the vSphere Tanzu Kubernetes Grid Image Builder to build Windows OVA image for use with [vSphere Kubernetes Service 3.2](https://docs.vmware.com/en/VMware-vSphere/8/rn/vmware-tanzu-kubernetes-grid-service-release-notes/index.html) and above.
+This tutorial describes how to use the vSphere Tanzu Kubernetes Grid Image Builder to build Windows OVA image for use with [vSphere Kubernetes Service 3.3][vsphere-kubernetes-service-release-notes] and above. Windows container workload support is only available in Kubernetes release v1.31 and above.
 
 ## Use case
 
@@ -8,7 +8,7 @@ I want to build a Windows Node Image to deploy a node pool for Windows container
 
 ## Requirements
 
-- Check the [prerequisites](https://docs.vmware.com/en/VMware-vSphere/8.0/vsphere-with-tanzu-installation-configuration/GUID-EE236215-DA4D-4579-8BEB-A693D1882C77.html)
+- Check the [prerequisites][prerequisites]
 - vCenter Server 8, which can be any vCenter 8 instance, it does not have to be the same vCenter managing your vSphere with Tanzu environment
 - Packer requires the vSphere environment to have DHCP configured; you cannot use static IP address management
 - A recent Windows Server 22H2 ISO image. Download through your Microsoft Developer Network (MSDN) or Volume Licensing (VL) account. The use of evaluation media is not supported or recommended.
@@ -17,19 +17,19 @@ I want to build a Windows Node Image to deploy a node pool for Windows container
 
 ## Prepare for Image Builder
 
-Follow the [standard tutorial](examples/tutorial_building_an_image.md) to prepare the environment for vSphere Tanzu Kubernetes Grid Image Builder.
+Follow the [standard tutorial][tutorials-base] to prepare the environment for vSphere Tanzu Kubernetes Grid Image Builder.
 
 ## Get Windows Server and VMware Tools ISO
 
 Windows Server 22H2 ISO image can be downloaded from Microsoft through your Microsoft Developer Network (MSDN) or Volume Licensing (VL) account.
 
-VMware Tools can be downloaded via the [Broadcom Knowledge Base](https://knowledge.broadcom.com/external/article/315363/how-to-install-vmware-tools.html).
+VMware Tools can be downloaded via the [Broadcom Knowledge Base][broadcom-kb].
 
 In this tutorial, we use Windows Server 22H2 `en-us_windows_server_2022_x64_dvd_620d7eac.iso` and `VMware-tools-windows-12.5.0-23800621.iso`.
 
 ### Install govc (Optional)
 
-You may follow the [govc documentation](https://github.com/vmware/govmomi/blob/main/govc/README.md) to install govc on the Linux VM you're building the image.
+You may follow the [govc documentation][govc-doc] to install govc on the Linux VM you're building the image.
 
 You may use the below example bash commands to upload Windows Server 22H2 ISO and the VMware Tools Windows ISO to your vCenter instance.
 
@@ -50,13 +50,13 @@ Alternatively, you may use the vCenter UI to upload the ISOs to the datastore.
 
 ## Prepare Windows setup answer file
 
-You may customize the Windows Node Image with a [Windows setup answer file](https://learn.microsoft.com/en-us/windows-hardware/manufacture/desktop/update-windows-settings-and-scripts-create-your-own-answer-file-sxs?view=windows-11)
+You may customize the Windows Node Image with a [Windows setup answer file][windows-setup-ans-file]
 
-The upstream Windows setup answer file can be found at [image builder](https://raw.githubusercontent.com/kubernetes-sigs/image-builder/refs/heads/main/images/capi/packer/ova/windows/windows-2022-efi/autounattend.xml).
+The upstream Windows setup answer file can be found at [Image Builder][ib-windows-unattended-xml].
 
 ### Provision Administrative Account for Log Collection
 
-In order for the Windows nodes to work with the [vSphere Kubernetes Service support bundle tool](https://knowledge.broadcom.com/external/article/345464/gathering-logs-for-vsphere-with-tanzu.html), you need to add an administrative account in the answer file.
+In order for the Windows nodes to work with the [vSphere Kubernetes Service support bundle tool][gather-logs], you need to add an administrative account in the answer file.
 
 The following snippet shows how to add an administrative account in the answer file.
 
@@ -140,28 +140,12 @@ vi packer-variables/windows/vsphere-windows.j2
 
 NOTE: You need to match the ISO image file names in the datastore.
 
-## Select Kubernetes version
-
-From the `vsphere-tanzu-kubernetes-grid-image-builder` directory where the Makefile is located run:
-
-```bash
-make list-versions
-```
-
-Windows container workload support is only available in Kubernetes release v1.31 and above.
-
 ## Run the Artifacts Container for the Selected Kubernetes Version
 
 Usage:
 
 ```bash
-make run-artifacts-container KUBERNETES_VERSION=<version>
-```
-
-Example:
-
-```bash
-make run-artifacts-container KUBERNETES_VERSION=v1.31.1+vmware.2-fips
+make run-artifacts-container
 ```
 
 ## Run the Image Builder Application
@@ -169,15 +153,12 @@ make run-artifacts-container KUBERNETES_VERSION=v1.31.1+vmware.2-fips
 Usage:
 
 ```bash
-make build-node-image OS_TARGET=<os_target> KUBERNETES_VERSION=v1.31.1+vmware.2-fips TKR_SUFFIX=<tkr_suffix> HOST_IP=<host_ip> IMAGE_ARTIFACTS_PATH=<image_artifacts_path> ARTIFACTS_CONTAINER_PORT=8081
+make build-node-image OS_TARGET=<os_target> TKR_SUFFIX=<tkr_suffix> HOST_IP=<host_ip> IMAGE_ARTIFACTS_PATH=<image_artifacts_path> ARTIFACTS_CONTAINER_PORT=8081
 ```
 
 NOTE:
 
 - The HOST_IP must be reachable from the vCenter.
-
-- You need to use the Kubernetes version which supports Windows. You may check Windows is in the Supported OS from
-the result from `make list-versions`.
 
 - You may list the Kubernetes in your Supervisor cluster to get the version suffix.
 
@@ -185,13 +166,13 @@ the result from `make list-versions`.
 $ kubectl get kr
 
 NAME                                                                    VERSION                       READY   COMPATIBLE   CREATED   TYPE
-kubernetesrelease.kubernetes.vmware.com/v1.31.1---vmware.2-fips-vkr.2   v1.31.1+vmware.2-fips-vkr.2   True    True         3h8m
+kubernetesrelease.kubernetes.vmware.com/v1.32.0---vmware.6-fips-vkr.2   v1.32.0+vmware.6-fips-vkr.2   True    True         3h8m
 ```
 
 Example:
 
 ```bash
-make build-node-image OS_TARGET=windows-2022-efi KUBERNETES_VERSION=v1.31.1+vmware.2-fips TKR_SUFFIX=vkr.2 HOST_IP=192.2.2.3 IMAGE_ARTIFACTS_PATH=/home/image-builder/image ARTIFACTS_CONTAINER_PORT=8081 AUTO_UNATTEND_ANSWER_FILE_PATH=/home/image-builder/windows_autounattend.xml
+make build-node-image OS_TARGET=windows-2022-efi TKR_SUFFIX=vkr.4 HOST_IP=192.2.2.3 IMAGE_ARTIFACTS_PATH=/home/image-builder/image ARTIFACTS_CONTAINER_PORT=8081 AUTO_UNATTEND_ANSWER_FILE_PATH=/home/image-builder/windows_autounattend.xml
 ```
 
 ## Verify the Custom Image
@@ -210,7 +191,7 @@ Download the custom image from local storage or from the vCenter Server.
 
 In your vSphere with Tanzu environment, create a local content library and upload the custom image there.
 
-Refer to the documentation for [creating a local content library](https://docs.vmware.com/en/VMware-vSphere/8.0/vsphere-with-tanzu-tkg/GUID-19E8E034-5256-4EFC-BEBF-D4F17A8ED021.html) for use with vSphere Kubernetes Service.
+Refer to the documentation for [creating a local content library][tkgs-service-with-supervisor] for use with vSphere Kubernetes Service.
 
 You need to upload both Linux and Windows node images to the local content library as the Linux node image will be
 used to deploy VMs for Kubernetes Control Plane and Linux node pools (if any).
@@ -219,11 +200,11 @@ Note: You should disable Security Policy for this content library for Windows im
 
 ## Create a cluster with Windows Node Pool
 
-You may refer to [vSphere Kubernetes Service 3.2 documentation]() for more information on how to deploy a cluster with Windows Node Pool with vSphere Kubernetes Service 3.2 and above.
+You may refer to [vSphere Kubernetes Service 3.3 documentation][vsphere-kubernetes-service-release-notes] for more information on how to deploy a cluster with Windows Node Pool with vSphere Kubernetes Service 3.3 and above.
 
 ## Known Issues for Windows Container Workload Support
 
-### Kubernetes Release v1.31
+### Kubernetes Release v1.32
 
 - The minimum vmclass should be best-effort-large for Windows Worker Node
 
@@ -232,35 +213,80 @@ You may refer to [vSphere Kubernetes Service 3.2 documentation]() for more infor
   Resolution:
   Switch to a vmclass configured with more resources.
 
-- Some Pods on Window Node's networking don't work correctly
+- After a node report stateful windows Application pods can be in fail (Unknown) state.
 
-  Some Pods on Window Node's networking don’t work correctly, which makes the Pod is not reachable, or the Pod can’t access other network peers.
-
-  If searching in antrea-agent log from the corresponding antrea-agent Pod which locates on the same Node as the bad Pod, some logs records shall be found with the key words “Failed to execute postInterfaceCreateHook”, e.g.,
+  Symptoms: The windows stateful pod description shows failed mount with error as following:
 
   ```bash
-  kubectl logs -n kube-system -c antrea-agent antrea-agent-windows-stvgp | grep "Failed to execute postInterfaceCreateHook"
-
-  E0921 04:38:39.289057 4364 interface_configuration_windows.go:488] "Failed to execute postInterfaceCreateHook" err="timed out: \"wait\" timed out after 5012 ms" interface="vEthernet (vsphere--ab7002)"
+  Warning FailedMount 23m kubelet MountVolume.MountDevice failed for volume "pvc-63a2bde4-8183-40ac-b115-247ae64b6cb4" : rpc error: code = Internal desc = error mounting volume. Parameters: {7e1b7769-d86d-4b8a-b9a6-a1a303021b43-63a2bde4-8183-40ac-b115-247ae64b6cb4 ntfs
   ```
 
-  If checking OVS port status, we may observe that a port is configured with error “could not add network device xxxxx to ofproto (Invalid argument)”, e.g.,
+  Relevant log’s location: logs of vsphere-csi-node `kubectl logs $pod_name` or `kubectl describe` the application pod it self.
+
+  Workaround: After restart if pod is in unknown state, follow these steps:
+
+  1. cordon the node with command kubectl cordon <\<*node*\>>
+
+  2. delete the pod, let pod schedule on other node and wait until pod is running
+
+  3. uncordon node with cmd : kubectl uncordon <\<*node*\>>
+
+- Upgrade of some linux pods will not complete when using 1 control plane (linux) and 1 worker node (windows) configuration.
+
+  Reason: Some of the linux pods are configured to use system resources like nodePort and are also configured with node affinity to linux nodes and upgrade strategy of rolling upgrades. When there is a single linux node in the cluster and pods are being upgraded, the previous version pod will bind to system resources like nodePort, which will block the scheduling and starting of the new version.
+
+  Symptom: The pod will be stuck in pending state with error message similar to the following:
 
   ```bash
-  kubectl exec -it -n kube-system antrea-agent-windows-znncw -- cmd.exe /c "C:\openvswitch\usr\bin\ovs-vsctl.exe show"
-  3cc1a6d5-adc1-45d3-a336-c3c2b8203e77
-      Bridge br-int
-          datapath_type: system
-          Port vsphere--c546b0
-                Interface vsphere--c546b0
-                    type: internal
-                    error: "could not add network device vsphere--c546b0 to ofproto (Invalid argument)"
-      ovs_version: "3.0.1.60555"
-   ```
+  Warning FailedScheduling 3m5s (x38 over 3h9m) default-scheduler 0/2 nodes are available: 1 node(s) didn't have free ports for the requested pod ports, 1 node(s) had untolerated taint {os: windows}. preemption: 0/2 nodes are available: 1 Preemption is not helpful for scheduling, 1 node(s) didn't have free ports for the requested pod ports.
+  ```
 
-   Workaround:
-   Kill the bad Pod using kubectl command to reschedule the Pod so that antrea-agent can re-program the networking for the Pod.
+  Workaround: Configure with additional control plane nodes or with another node pool that has linux nodes.
+
+- Autoscaler is unable to scale up windows nodes in a cluster containing multiple node pools with mixed OS types.
+
+  Symptoms: In autoscaler based guest clusters having hybrid node pools with different OS, (Photon, Ubuntu, Windows), when scaling up applications on the clusters, we are observing that windows nodes don't get scaled up even though windows pods are in pending state
+
+  Relevant log’s location: Check autoscaler pod logs
+  
+  ```log
+  error: can't schedule pod : predicate "NodeAffinity" didn't pass (predicateReasons=[node(s) didn't match Pod's node affinity/selector];
+  ```
+
+  Steps to reproduce:
+  1.Deploy guest clusters with autoscaler based annotations having 3 node pools, one for each of photon, ubuntu and linux.
+
+  ```yaml
+    - class: node-pool
+      metadata:
+        annotations:
+          cluster.x-k8s.io/cluster-api-autoscaler-node-group-max-size: "1"
+          cluster.x-k8s.io/cluster-api-autoscaler-node-group-min-size: "0"
+          run.tanzu.vmware.com/resolve-os-image: os-name=ubuntu
+  ```
+
+  2.Install autoscaler package and check that autoscaler pod was running.
+  3.Deploy both windows and linux based workloads
+  4.Upon scale-up of linux workloads, observe that autoscaler creates another new node (as per min/max annotations)
+  5.However, windows workloads were stuck in pending state and new windows node does not get deployed by autoscaler
+
+  Resolution: When the cluster contains multiple node pools, the autoscaler will try to automatically scale up the node to handle pending pods. When the pod contains nodeSelector, the autoscaler will simulate the node to be created based on the annotation of the current node pool to evaluate whether it meets the needs of the current pod. Therefore, it is necessary to add annotation(`capacity.cluster-autoscaler.kubernetes.io/labels: "key1=value1,key2=value2"`) in machine deployment to inform the autoscaler that this node-pool can create nodes with this label.
+
+  Windows pods need nodeSelector to schedule to Windows nodes, so this problem will be encountered.
 
 ### Generic Known Issues
 
-You may refer to [this link](https://docs.vmware.com/en/VMware-Tanzu-Kubernetes-releases/services/rn/vmware-tanzu-kubernetes-releases-release-notes/index.html) for generic known issues for vSphere Kubernetes Service.
+You may refer to [this link][supervisor-8-release-notes] for generic known issues for vSphere Kubernetes Service.
+
+[//]: Links
+
+[vsphere-kubernetes-service-release-notes]: https://techdocs.broadcom.com/us/en/vmware-cis/vsphere/vsphere-supervisor/8-0/release-notes/vmware-tanzu-kubernetes-grid-service-release-notes.html
+[prerequisites]: https://techdocs.broadcom.com/us/en/vmware-cis/vsphere/vsphere-supervisor/8-0/installing-and-configuring-vsphere-supervisor.html
+[tutorials-base]: examples/tutorial_building_an_image.md
+[broadcom-kb]: https://knowledge.broadcom.com/external/article/315363/how-to-install-vmware-tools.html
+[govc-doc]: https://github.com/vmware/govmomi/blob/main/govc/README.md
+[windows-setup-ans-file]: https://learn.microsoft.com/en-us/windows-hardware/manufacture/desktop/update-windows-settings-and-scripts-create-your-own-answer-file-sxs?view=windows-11
+[ib-windows-unattended-xml]: https://raw.githubusercontent.com/kubernetes-sigs/image-builder/refs/heads/main/images/capi/packer/ova/windows/windows-2022-efi/autounattend.xml
+[gather-logs]: https://knowledge.broadcom.com/external/article/345464/gathering-logs-for-vsphere-with-tanzu.html
+[tkgs-service-with-supervisor]: https://techdocs.broadcom.com/us/en/vmware-cis/vsphere/vsphere-supervisor/8-0/using-tkg-service-with-vsphere-supervisor.html
+[supervisor-8-release-notes]:https://techdocs.broadcom.com/us/en/vmware-cis/vsphere/vsphere-supervisor/8-0/release-notes/vmware-tkrs-release-notes.html

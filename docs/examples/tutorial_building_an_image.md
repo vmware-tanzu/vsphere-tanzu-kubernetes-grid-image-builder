@@ -95,12 +95,14 @@ For example:
 }
 ```
 
-## Select Kubernetes version
+## Identify the Kubernetes version
 
-To identify the version of Kubernetes Release to be used, from the `vsphere-tanzu-kubernetes-grid-image-builder` directory where the Makefile is located run:
+To identify the version of Kubernetes Release supported by the current branch, refer the [supported-version.txt](../../supported-version.txt)
+
+Usage:
 
 ```bash
-make list-versions
+cat supported-version.txt
 ```
 
 ## Run the Artifacts Server Container for the Selected Kubernetes Version
@@ -110,13 +112,7 @@ Running the `run-artifacts-container` Makefile target, will pull the Artifacts S
 Usage:
 
 ```bash
-make run-artifacts-container KUBERNETES_VERSION=<version>
-```
-
-Example:
-
-```bash
-make run-artifacts-container KUBERNETES_VERSION=v1.31.1+vmware.2-fips
+make run-artifacts-container
 ```
 
 ## Run the Image Builder Application
@@ -124,7 +120,7 @@ make run-artifacts-container KUBERNETES_VERSION=v1.31.1+vmware.2-fips
 Usage:
 
 ```bash
-make build-node-image OS_TARGET=<os_target> KUBERNETES_VERSION=v1.31.1+vmware.2-fips TKR_SUFFIX=<tkr_suffix> HOST_IP=<host_ip> IMAGE_ARTIFACTS_PATH=<image_artifacts_path> ARTIFACTS_CONTAINER_PORT=8081
+make build-node-image OS_TARGET=<os_target> TKR_SUFFIX=<tkr_suffix> HOST_IP=<host_ip> IMAGE_ARTIFACTS_PATH=<image_artifacts_path> ARTIFACTS_CONTAINER_PORT=8081
 ```
 
 NOTE: The HOST_IP must be reachable from the vCenter.
@@ -132,7 +128,7 @@ NOTE: The HOST_IP must be reachable from the vCenter.
 Example:
 
 ```bash
-make build-node-image OS_TARGET=ubuntu-2004-efi KUBERNETES_VERSION=v1.31.1+vmware.2-fips TKR_SUFFIX=byoi HOST_IP=192.2.2.3 IMAGE_ARTIFACTS_PATH=/home/ubuntu/image ARTIFACTS_CONTAINER_PORT=8081
+make build-node-image OS_TARGET=ubuntu-2204-efi TKR_SUFFIX=byoi HOST_IP=192.2.2.3 IMAGE_ARTIFACTS_PATH=/home/ubuntu/image ARTIFACTS_CONTAINER_PORT=8081
 ```
 
 ## Verify the Custom Image
@@ -161,5 +157,5 @@ To use the custom TKR, configure the vSphere Namespace to use the local content 
 
 [//]: Links
 [docker-installation]: https://docs.docker.com/engine/install/
-[create-local-content-library]: https://docs.vmware.com/en/VMware-vSphere/8.0/vsphere-with-tanzu-tkg/GUID-19E8E034-5256-4EFC-BEBF-D4F17A8ED021.html
+[create-local-content-library]: https://techdocs.broadcom.com/us/en/vmware-cis/vsphere/vsphere-supervisor/8-0/using-tkg-service-with-vsphere-supervisor.html
 [customizations]: ./customizations/README.md
