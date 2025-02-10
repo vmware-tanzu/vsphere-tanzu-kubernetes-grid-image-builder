@@ -1,6 +1,6 @@
 # vSphere Tanzu Kubernetes Grid Image Builder
 
-vSphere Tanzu Kubernetes Grid Image Builder provides tooling that can be used to build node images for use with [vSphere with Tanzu](https://docs.vmware.com/en/VMware-vSphere-with-Tanzu/index.html).
+vSphere Tanzu Kubernetes Grid Image Builder provides tooling that can be used to build node images for use with [vSphere with Tanzu][vsphere-with-tanzu].
 
 ## Content
 
@@ -34,18 +34,19 @@ Below are the prerequisites for building the node images
 - Clone this repository on the linux environment for building the image.
 - Update the vSphere environment details like vCenter IP, Username, Password, etc. in [vsphere.j2](packer-variables/vsphere.j2)
   - For details on the permissions required for the user please refer to the packer [vsphere-iso documentation](https://developer.hashicorp.com/packer/plugins/builders/vsphere/vsphere-iso#required-vsphere-privileges).
-- Select the Kubernetes version.
-  - Use `make list-versions` to list supported Kubernetes versions.
-- Run the artifacts container for the selected Kubernetes version using `make run-artifacts-container KUBERNETES_VERSION=v1.22.13+vmware.1`.
+- To identify the kubernetes version supported by the branch, check the version information provided in [supported version file][supported-version].
+- Run the artifacts container using `make run-artifacts-container`.
   - Default port used by the artifacts container is `8081` but this can be configured using the `ARTIFACTS_CONTAINER_PORT` parameter.
 - Run the image-builder container to build the node image(use `make build-node-image` target).
   - Default port used the image-builder containter is `8082` but this can be configured using the `PACKER_HTTP_PORT`.
-- Once the OVA is generated upload the OVA to a [content library](https://docs.vmware.com/en/VMware-vSphere/7.0/com.vmware.vsphere.vm_admin.doc/GUID-897EEEC2-B378-41A7-B92B-D1159B5F6095.html) used by the supervisor.
+- Once the OVA is generated upload the OVA to a [content library][vm-admin-guide] used by the supervisor.
 - To clean the containers and artifacts use the `make clean` target.
 
-## Supported Kubernetes Versions
+## Supported Kubernetes Version
 
-[supported-versions.json](supported-versions.json) holds information about the supported Kubernetes versions and their corresponding supported OS targets along with the artifacts container image URL. This file will be updated when a new Kubernetes version is supported by the **vSphere Tanzu** team.
+[supported-version.txt](supported-version.txt) holds information about the kubernetes release version supported.
+
+[supported-context.json](supported-context.json) holds information about the context for the supported Kubernetes versions which includes supported OS targets along with the artifacts container image URL. This file will be updated when a new Kubernetes version is supported by the **vSphere Tanzu** team.
 
 ## Make targets
 
@@ -56,13 +57,6 @@ Below are the prerequisites for building the node images
 ```bash
 make
 make help
-```
-
-- `make list-versions` gives information about supported Kubernetes versions and the corresponding OS targets
-
-```bash
-make list-versions PRINT_HELP=y # To show the help information for this target.
-make list-versions              # Retrieves information from supported-versions.json file.
 ```
 
 ### Clean
@@ -98,19 +92,19 @@ make clean IMAGE_ARTIFACTS_PATH=/root/artifacts/ LABEL=byoi_image_builder # To c
 ### Image Building
 
 - `make run-artifacts-container` is used to run the artifacts container for a Kubernetes version at a particular port
-  - artifacts image URL will be fetched from the [supported-versions.json](supported-versions.json) based on the Kubernetes version selected.
+  - artifacts image URL will be fetched from the [supported-context.json](supported-context.json).
   - By default artifacts container uses port `8080` by default however this can be configured through the `ARTIFACTS_CONTAINER_PORT` parameter.
 
 ```bash
 make run-artifacts-container PRINT_HELP=y                                                       # To show the help information for this target
-make run-artifacts-container KUBERNETES_VERSION=v1.22.13+vmware.1 ARTIFACTS_CONTAINER_PORT=9090 # To run 1.22.13 Kubernetes artifacts container on port 9090
+make run-artifacts-container ARTIFACTS_CONTAINER_PORT=9090 # To run 1.22.13 Kubernetes artifacts container on port 9090
 ```
 
 - `make build-image-builder-container` is used to build the image builder container locally with all the dependencies like `Packer`, `Ansible`, and `OVF Tool`.
 
 ```bash
 make build-image-builder-container PRINT_HELP=y # To show the help information for this target.
-make build-image-builder-container KUBERNETES_VERSION=v1.23.15+vmware.1 # To create the image builder container.
+make build-image-builder-container # To create the image builder container.
 ```
 
 - `make build-node-image` is used to build the vSphere Tanzu compatible node image for a Kubernetes version.
@@ -119,7 +113,7 @@ make build-image-builder-container KUBERNETES_VERSION=v1.23.15+vmware.1 # To cre
 
 ```bash
 make build-node-image PRINT_HELP=y # To show the help information for this target.
-make build-node-image OS_TARGET=photon-3 KUBERNETES_VERSION=v1.23.15+vmware.1 TKR_SUFFIX=byoi HOST_IP=1.2.3.4 IMAGE_ARTIFACTS_PATH=/Users/image ARTIFACTS_CONTAINER_PORT=9090 # Create photon-3 1.23.15 Kubernetes node image
+make build-node-image OS_TARGET=photon-5 TKR_SUFFIX=byoi HOST_IP=1.2.3.4 IMAGE_ARTIFACTS_PATH=/Users/image ARTIFACTS_CONTAINER_PORT=9090 # Create photon-5 based Kubernetes node image
 ```
 
 ## Customizations Examples
@@ -151,3 +145,6 @@ VMware will support issues with the vSphere Tanzu Kubernetes Grid Image Builder,
 [contributing]: CONTRIBUTING.md
 [dco]: https://cla.vmware.com/dco
 [project-license]: LICENSE.txt
+[vsphere-with-tanzu]: https://techdocs.broadcom.com/us/en/vmware-cis/vsphere/vsphere-supervisor/8-0/vsphere-supervisor-services-and-workloads-8-0.html
+[supported-version]: ./supported-version.txt
+[vm-admin-guide]: https://techdocs.broadcom.com/us/en/vmware-cis/vsphere/vsphere/8-0/vsphere-virtual-machine-administration-guide-8-0.html
