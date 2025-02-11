@@ -1,4 +1,5 @@
-# Copyright 2023 VMware, Inc.
+# © Broadcom. All Rights Reserved.
+# The term “Broadcom” refers to Broadcom Inc. and/or its subsidiaries.
 # SPDX-License-Identifier: MPL-2.0
 
 ARG BASE_IMAGE=library/photon:5.0
