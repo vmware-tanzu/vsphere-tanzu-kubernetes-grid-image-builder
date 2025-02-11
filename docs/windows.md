@@ -244,7 +244,7 @@ You may refer to [vSphere Kubernetes Service 3.3 documentation][vsphere-kubernet
 
    Resolution: Upgrade to v1.31.4 or higher.
 
-- After a node report stateful windows Application pods can be in fail (Unknown) state.
+- After a node reboot, stateful windows Application pods can be in failed (Unknown) state.
 
   Symptoms: The windows stateful pod description shows failed mount with error as following:
 
