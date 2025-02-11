@@ -213,7 +213,7 @@ You may refer to [vSphere Kubernetes Service 3.3 documentation][vsphere-kubernet
   Resolution:
   Switch to a vmclass configured with more resources.
 
-- After a node report stateful windows Application pods can be in fail (Unknown) state.
+- After a node reboot, stateful windows Application pods can be in failed (Unknown) state.
 
   Symptoms: The windows stateful pod description shows failed mount with error as following:
 
@@ -242,37 +242,6 @@ You may refer to [vSphere Kubernetes Service 3.3 documentation][vsphere-kubernet
   ```
 
   Workaround: Configure with additional control plane nodes or with another node pool that has linux nodes.
-
-- Autoscaler is unable to scale up windows nodes in a cluster containing multiple node pools with mixed OS types.
-
-  Symptoms: In autoscaler based guest clusters having hybrid node pools with different OS, (Photon, Ubuntu, Windows), when scaling up applications on the clusters, we are observing that windows nodes don't get scaled up even though windows pods are in pending state
-
-  Relevant log’s location: Check autoscaler pod logs
-  
-  ```log
-  error: can't schedule pod : predicate "NodeAffinity" didn't pass (predicateReasons=[node(s) didn't match Pod's node affinity/selector];
-  ```
-
-  Steps to reproduce:
-  1.Deploy guest clusters with autoscaler based annotations having 3 node pools, one for each of photon, ubuntu and linux.
-
-  ```yaml
-    - class: node-pool
-      metadata:
-        annotations:
-          cluster.x-k8s.io/cluster-api-autoscaler-node-group-max-size: "1"
-          cluster.x-k8s.io/cluster-api-autoscaler-node-group-min-size: "0"
-          run.tanzu.vmware.com/resolve-os-image: os-name=ubuntu
-  ```
-
-  2.Install autoscaler package and check that autoscaler pod was running.
-  3.Deploy both windows and linux based workloads
-  4.Upon scale-up of linux workloads, observe that autoscaler creates another new node (as per min/max annotations)
-  5.However, windows workloads were stuck in pending state and new windows node does not get deployed by autoscaler
-
-  Resolution: When the cluster contains multiple node pools, the autoscaler will try to automatically scale up the node to handle pending pods. When the pod contains nodeSelector, the autoscaler will simulate the node to be created based on the annotation of the current node pool to evaluate whether it meets the needs of the current pod. Therefore, it is necessary to add annotation(`capacity.cluster-autoscaler.kubernetes.io/labels: "key1=value1,key2=value2"`) in machine deployment to inform the autoscaler that this node-pool can create nodes with this label.
-
-  Windows pods need nodeSelector to schedule to Windows nodes, so this problem will be encountered.
 
 ### Generic Known Issues
 
