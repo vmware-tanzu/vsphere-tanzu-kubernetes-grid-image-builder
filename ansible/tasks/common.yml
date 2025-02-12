@@ -17,6 +17,18 @@
     state: directory
     mode: 0755
 
+- name: Create chronyd.service.d
+  file:
+    path: /etc/systemd/system/chronyd.service.d/
+    state: directory
+    mode: 0755
+
+- name: Create chronyd autorestart.conf
+  copy:
+    src: files/etc/systemd/system/chronyd.service.d/autorestart.conf
+    dest: /etc/systemd/system/chronyd.service.d/autorestart.conf
+    mode: 0644
+
 - name: Configure /etc/vmware-tools/tools.conf
   copy:
     src: files/etc/vmware-tools/tools.conf
