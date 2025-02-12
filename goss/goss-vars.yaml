@@ -1,4 +1,5 @@
-# Copyright 2023 VMware, Inc.
+# © Broadcom. All Rights Reserved.
+# The term “Broadcom” refers to Broadcom Inc. and/or its subsidiaries.
 # SPDX-License-Identifier: MPL-2.0
 
 ---
@@ -569,8 +570,8 @@ windows:
     windows-service:
 
     files:
-      'c:/program files/Cloudbase Solutions/Cloudbase-init/conf/cloudbase-init.conf': 
-        exists: true
+      ? "c:/program files/Cloudbase Solutions/Cloudbase-init/conf/cloudbase-init.conf"
+      : exists: true
         filetype: file
         contains:
           - "COM2,115200,N,8"
@@ -603,8 +604,8 @@ windows:
           - "cloudbaseinit.plugins.common.localscripts.LocalScriptsPlugin"
           - "cloudbaseinit.plugins.windows.createuser.CreateUserPlugin"
           - "cloudbaseinit.plugins.windows.extendvolumes.ExtendVolumesPlugin"
-      'c:/program files/Cloudbase Solutions/Cloudbase-init/conf/cloudbase-init-unattend.conf': 
-        exists: true
+      ? "c:/program files/Cloudbase Solutions/Cloudbase-init/conf/cloudbase-init-unattend.conf"
+      : exists: true
         filetype: file
         contains:
           - "metadata_services=cloudbaseinit.metadata.services.vmwareguestinfoservice.VMwareGuestInfoService"
@@ -641,8 +642,8 @@ windows:
           - "cloudbaseinit.plugins.common.localscripts.LocalScriptsPlugin"
           - "cloudbaseinit.plugins.windows.createuser.CreateUserPlugin"
           - "cloudbaseinit.plugins.windows.extendvolumes.ExtendVolumesPlugin"
-      'c:/program files/Cloudbase Solutions/Cloudbase-init/conf/cloudbase-init-unattend.conf': 
-        exists: true
+      ? "c:/program files/Cloudbase Solutions/Cloudbase-init/conf/cloudbase-init-unattend.conf"
+      : exists: true
         filetype: file
         contains:
           - "metadata_services=cloudbaseinit.metadata.services.base.EmptyMetadataService"
@@ -658,6 +659,9 @@ tkg:
       sshd.service:
         running: true
         enabled: true
+      systemd-timesyncd.service:
+        enabled: false
+        running: false
     kernel-param:
     ova:
       os_version:
@@ -665,6 +669,13 @@ tkg:
           package:
             dkms:
       kernel-param:
+      common-files:
+    files:
+      "/etc/systemd/journald.conf":
+        exists: true
+        filetype: file
+        contains:
+          - "/^SystemMaxUse=/"
   photon:
     package:
       glibc:
@@ -733,6 +744,9 @@ tkg:
       sshd.service:
         enabled: true
         running: true
+      systemd-timesyncd.service:
+        enabled: false
+        running: false
       sshd-keygen.service:
         enabled: true
         running: true
@@ -748,3 +762,9 @@ tkg:
           package:
             dkms:
       kernel-param:
+    files:
+      "/etc/systemd/journald.conf":
+        exists: true
+        filetype: file
+        contains:
+          - "/^SystemMaxUse=/"
