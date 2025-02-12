@@ -1,4 +1,5 @@
-# Copyright 2023 VMware, Inc.
+# © Broadcom. All Rights Reserved.
+# The term “Broadcom” refers to Broadcom Inc. and/or its subsidiaries.
 # SPDX-License-Identifier: MPL-2.0
 ---
 - name: Modify /bin/sh to point to bash instead of dash
@@ -6,3 +7,8 @@
   with_items:
     - echo "dash dash/sh boolean false" |  debconf-set-selections
     - DEBIAN_FRONTEND=noninteractive dpkg-reconfigure dash
+
+- name: Mask systemd-timesyncd unit
+  ansible.builtin.systemd:
+    masked: true
+    name: systemd-timesyncd.service

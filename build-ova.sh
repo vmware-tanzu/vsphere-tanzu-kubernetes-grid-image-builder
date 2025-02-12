@@ -1,5 +1,6 @@
 #!/bin/bash
-# Copyright 2023 VMware, Inc.
+# © Broadcom. All Rights Reserved.
+# The term “Broadcom” refers to Broadcom Inc. and/or its subsidiaries.
 # SPDX-License-Identifier: MPL-2.0
 
 set -e
@@ -73,9 +74,9 @@ function generate_custom_ovf_properties() {
 }
 
 
-function download_photon_stig_files() {
-    if [[ "$OS_TARGET" != "photon-3" && "$OS_TARGET" != "photon-5" ]]; then
-        echo "Skipping STIG setup as OS_TARGET is not Photon"
+function download_stig_files() {
+    if [[ "$OS_TARGET" != "photon-3" && "$OS_TARGET" != "photon-5" && "$OS_TARGET" != "ubuntu-2204-efi" ]]; then
+        echo "Skipping STIG setup as '${OS_TARGET}' is not STIG Compliant"
         return
     fi
 
@@ -97,6 +98,12 @@ function download_photon_stig_files() {
         tar -xvf vmware-photon-5.0-stig-ansible-hardening.tar.gz -C "${image_builder_root}/image/tmp/"
         mv ${image_builder_root}/image/tmp/vmware-photon-5.0-stig-ansible-hardening-* "${stig_compliance_dir}"
         rm -rf vmware-photon-5.0-stig-ansible-hardening.tar.gz
+    elif [ ${OS_TARGET} == "ubuntu-2204-efi" ]
+    then
+        wget -q http://${HOST_IP}:${ARTIFACTS_CONTAINER_PORT}/artifacts/vmware-ubuntu-22.04-stig-ansible-hardening.tar.gz
+        tar -xvf vmware-ubuntu-22.04-stig-ansible-hardening.tar.gz -C "${image_builder_root}/image/tmp/"
+        mv ${image_builder_root}/image/tmp/vmware-ubuntu-22.04-stig-ansible-hardening-* "${stig_compliance_dir}"
+        rm -rf vmware-ubuntu-22.04-stig-ansible-hardening.tar.gz
     fi
 }
 
@@ -139,7 +146,7 @@ function main() {
     download_configuration_files
     generate_packager_configuration
     generate_custom_ovf_properties
-    download_photon_stig_files
+    download_stig_files
     packer_logging
     trigger_image_builder
     copy_ova

@@ -1,4 +1,5 @@
-# Copyright 2023 VMware, Inc.
+# © Broadcom. All Rights Reserved.
+# The term “Broadcom” refers to Broadcom Inc. and/or its subsidiaries.
 # SPDX-License-Identifier: MPL-2.0
 ---
 - name: Configure /etc/sysctl.d/80-bridged-net-traffic.conf
@@ -174,3 +175,11 @@
 - name: Update initramfs
   command: "{{ systemd_networkd_update_initramfs }}"
   when: (systemd_networkd_update_initramfs is defined) and (systemd_networkd_update_initramfs | length > 0)
+
+- name: Copy /etc/systemd/journald.conf
+  ansible.builtin.template:
+    src: "etc/systemd/journald.conf"
+    dest: "/etc/systemd/journald.conf"
+    owner: root
+    group: root
+    mode: 0644
